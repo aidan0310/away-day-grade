@@ -35,7 +35,18 @@ const LogMatch = () => {
   const { user, profile } = useAuth();
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
-  const [stadium, setStadium] = useState("");
+  const supportedTeam = profile?.supported_team ?? "";
+
+  // Stadium is determined by venue: home = supporter's club, away = opponent's club.
+  const stadium = useMemo(() => {
+    const club = isAway ? opponent : supportedTeam;
+    return stadiumForClub(club) ?? "";
+  }, [isAway, opponent, supportedTeam]);
+
+  const opponentOptions = useMemo(
+    () => PREMIER_LEAGUE_CLUBS.filter((c) => c.name !== supportedTeam),
+    [supportedTeam]
+  );
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
