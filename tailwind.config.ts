@@ -13,8 +13,28 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['"Bebas Neue"', 'Inter', 'sans-serif'],
+      },
+      backgroundImage: {
+        'gradient-primary': 'var(--gradient-primary)',
+        'gradient-accent': 'var(--gradient-accent)',
+        'gradient-card': 'var(--gradient-card)',
+        'gradient-hero': 'var(--gradient-hero)',
+      },
+      boxShadow: {
+        'glow': 'var(--shadow-glow)',
+        'card': 'var(--shadow-card)',
+        'elevated': 'var(--shadow-elevated)',
+      },
       colors: {
         border: "hsl(var(--border))",
+        'rating-bad': 'hsl(var(--rating-bad))',
+        'rating-mid': 'hsl(var(--rating-mid))',
+        'rating-good': 'hsl(var(--rating-good))',
+        'surface-elevated': 'hsl(var(--surface-elevated))',
+        pitch: 'hsl(var(--pitch))',
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
