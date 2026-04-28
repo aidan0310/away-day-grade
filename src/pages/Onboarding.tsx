@@ -3,12 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
-const popular = ["Arsenal", "Liverpool", "Man Utd", "Man City", "Chelsea", "Tottenham", "Newcastle", "Aston Villa", "Celtic", "Rangers"];
+import { PREMIER_LEAGUE_CLUBS } from "@/lib/premier-league";
 
 const Onboarding = () => {
   const nav = useNavigate();
@@ -16,17 +15,17 @@ const Onboarding = () => {
   const [team, setTeam] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const save = async (chosen: string) => {
-    if (!user) return;
+  const save = async () => {
+    if (!user || !team) return;
     setLoading(true);
-    const { error } = await supabase.from("profiles").update({ supported_team: chosen }).eq("id", user.id);
+    const { error } = await supabase.from("profiles").update({ supported_team: team }).eq("id", user.id);
     setLoading(false);
     if (error) {
       toast.error(error.message);
       return;
     }
     await refreshProfile();
-    toast.success(`Up the ${chosen}!`);
+    toast.success(`Up the ${team}!`);
     nav("/");
   };
 
@@ -35,39 +34,26 @@ const Onboarding = () => {
       <div className="w-full max-w-md space-y-8">
         <div className="space-y-2 text-center">
           <h1 className="font-display text-4xl tracking-wider">Who do you support?</h1>
-          <p className="text-muted-foreground">We'll badge your reviews on the feed.</p>
-        </div>
-
-        <div className="flex flex-wrap gap-2 justify-center">
-          {popular.map((t) => (
-            <button
-              key={t}
-              onClick={() => save(t)}
-              disabled={loading}
-              className="rounded-full border border-border bg-card px-4 py-2 text-sm font-bold transition-all hover:border-primary hover:text-primary disabled:opacity-50"
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative flex items-center gap-3">
-          <div className="flex-1 h-px bg-border" />
-          <span className="text-xs uppercase tracking-wider text-muted-foreground font-bold">Or</span>
-          <div className="flex-1 h-px bg-border" />
+          <p className="text-muted-foreground">Premier League clubs only. We'll badge your reviews on the feed.</p>
         </div>
 
         <div className="space-y-3">
-          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Type your team</Label>
-          <Input
-            value={team}
-            onChange={(e) => setTeam(e.target.value.slice(0, 50))}
-            placeholder="e.g. Wrexham AFC"
-            className="h-12 bg-card"
-          />
+          <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Your club</Label>
+          <Select value={team} onValueChange={setTeam}>
+            <SelectTrigger className="h-12 bg-card">
+              <SelectValue placeholder="Pick your Premier League club" />
+            </SelectTrigger>
+            <SelectContent className="max-h-80 bg-card">
+              {PREMIER_LEAGUE_CLUBS.map((c) => (
+                <SelectItem key={c.name} value={c.name}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button
-            onClick={() => team.trim() && save(team.trim())}
-            disabled={loading || team.trim().length < 2}
+            onClick={save}
+            disabled={loading || !team}
             className="w-full h-12 bg-gradient-primary text-primary-foreground font-extrabold shadow-glow"
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Save my team"}
