@@ -72,6 +72,16 @@ const StadiumDetail = () => {
                   <Mini label="Damage" v={avgs.damage} />
                 </div>
               )}
+
+              {avgPint != null && (
+                <div className="stat-card flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Avg Pint Price</p>
+                    <p className="text-xs text-muted-foreground mt-1">From {pintPrices.length} {pintPrices.length === 1 ? "report" : "reports"}</p>
+                  </div>
+                  <span className="font-display text-4xl tracking-wider text-primary">£{avgPint.toFixed(2)}</span>
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
