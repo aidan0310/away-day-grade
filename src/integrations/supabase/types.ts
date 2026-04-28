@@ -14,7 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      matches: {
+        Row: {
+          atmosphere: number
+          created_at: string
+          damage: number
+          id: string
+          is_away: boolean
+          match_date: string
+          note: string | null
+          opponent: string
+          scran: number
+          stadium_id: string
+          user_id: string
+          view_rating: number
+        }
+        Insert: {
+          atmosphere: number
+          created_at?: string
+          damage: number
+          id?: string
+          is_away?: boolean
+          match_date: string
+          note?: string | null
+          opponent: string
+          scran: number
+          stadium_id: string
+          user_id: string
+          view_rating: number
+        }
+        Update: {
+          atmosphere?: number
+          created_at?: string
+          damage?: number
+          id?: string
+          is_away?: boolean
+          match_date?: string
+          note?: string | null
+          opponent?: string
+          scran?: number
+          stadium_id?: string
+          user_id?: string
+          view_rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_stadium_id_fkey"
+            columns: ["stadium_id"]
+            isOneToOne: false
+            referencedRelation: "stadiums"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          supported_team: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_name: string
+          id: string
+          supported_team?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          supported_team?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      stadiums: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          team: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          team?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          team?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
