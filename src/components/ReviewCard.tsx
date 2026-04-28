@@ -53,6 +53,13 @@ export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
         <Stat label="Damage" value={data.damage} />
       </div>
 
+      {data.pint_price != null && (
+        <div className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2 border border-border/50">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pint Price</span>
+          <span className="font-display text-xl tracking-wider text-primary">£{Number(data.pint_price).toFixed(2)}</span>
+        </div>
+      )}
+
       {data.note && (
         <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary pl-3">
           "{data.note}"
