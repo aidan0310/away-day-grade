@@ -137,6 +137,23 @@ const LogMatch = () => {
           ))}
         </div>
 
+        <Field label="Price of a pint (optional)">
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-lg text-muted-foreground pointer-events-none">£</span>
+            <Input
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.10"
+              value={pintPrice}
+              onChange={(e) => setPintPrice(e.target.value)}
+              placeholder="6.50"
+              className="h-12 bg-secondary border-0 pl-9 font-extrabold text-lg"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Helps fans see the average pint price at this ground.</p>
+        </Field>
+
         <Field label="Notes (optional)">
           <Textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} placeholder="Best pie I've had in years..." className="bg-card border-border min-h-[88px]" />
         </Field>
