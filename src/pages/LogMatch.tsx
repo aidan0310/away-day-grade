@@ -70,6 +70,7 @@ const LogMatch = () => {
         view_rating: ratings.view_rating,
         scran: ratings.scran,
         damage: ratings.damage,
+        pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
         note: note.trim() || null,
       });
       if (error) throw error;
