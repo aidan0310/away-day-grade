@@ -37,6 +37,8 @@ const StadiumDetail = () => {
     damage: avg(reviews.map(r => r.damage)),
   } : null;
   const overall = avgs ? (avgs.atmosphere + avgs.view + avgs.scran + avgs.damage) / 4 : 0;
+  const pintPrices = reviews.map(r => r.pint_price).filter((p): p is number => p != null).map(Number);
+  const avgPint = pintPrices.length ? pintPrices.reduce((a, b) => a + b, 0) / pintPrices.length : null;
 
   return (
     <AppShell>
@@ -68,6 +70,16 @@ const StadiumDetail = () => {
                   <Mini label="View" v={avgs.view} />
                   <Mini label="Scran" v={avgs.scran} />
                   <Mini label="Damage" v={avgs.damage} />
+                </div>
+              )}
+
+              {avgPint != null && (
+                <div className="stat-card flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Avg Pint Price</p>
+                    <p className="text-xs text-muted-foreground mt-1">From {pintPrices.length} {pintPrices.length === 1 ? "report" : "reports"}</p>
+                  </div>
+                  <span className="font-display text-4xl tracking-wider text-primary">£{avgPint.toFixed(2)}</span>
                 </div>
               )}
             </div>

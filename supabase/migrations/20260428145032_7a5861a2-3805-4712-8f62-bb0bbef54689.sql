@@ -1,0 +1,1 @@
+ALTER TABLE public.matches ADD COLUMN pint_price numeric(5,2);

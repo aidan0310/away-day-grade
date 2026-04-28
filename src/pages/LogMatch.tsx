@@ -18,7 +18,7 @@ const RATINGS = [
   { key: "atmosphere", label: "Atmosphere", desc: "Noise, songs, the buzz" },
   { key: "view_rating", label: "The View", desc: "Pitch visibility" },
   { key: "scran", label: "The Scran", desc: "Food & drink" },
-  { key: "damage", label: "The Damage", desc: "Value for money" },
+  { key: "damage", label: "The Damage", desc: "Value for money (1–10)" },
 ] as const;
 
 const schema = z.object({
@@ -36,6 +36,7 @@ const LogMatch = () => {
   const [stadium, setStadium] = useState("");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
+  const [pintPrice, setPintPrice] = useState<string>("");
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
@@ -69,6 +70,7 @@ const LogMatch = () => {
         view_rating: ratings.view_rating,
         scran: ratings.scran,
         damage: ratings.damage,
+        pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
         note: note.trim() || null,
       });
       if (error) throw error;
@@ -134,6 +136,23 @@ const LogMatch = () => {
             />
           ))}
         </div>
+
+        <Field label="Price of a pint (optional)">
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 font-extrabold text-lg text-muted-foreground pointer-events-none">£</span>
+            <Input
+              type="number"
+              inputMode="decimal"
+              min="0"
+              step="0.10"
+              value={pintPrice}
+              onChange={(e) => setPintPrice(e.target.value)}
+              placeholder="6.50"
+              className="h-12 bg-secondary border-0 pl-9 font-extrabold text-lg"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Helps fans see the average pint price at this ground.</p>
+        </Field>
 
         <Field label="Notes (optional)">
           <Textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} placeholder="Best pie I've had in years..." className="bg-card border-border min-h-[88px]" />
