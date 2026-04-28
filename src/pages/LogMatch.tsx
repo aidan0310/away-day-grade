@@ -36,6 +36,7 @@ const LogMatch = () => {
   const [stadium, setStadium] = useState("");
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
+  const [pintPrice, setPintPrice] = useState<string>("");
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
