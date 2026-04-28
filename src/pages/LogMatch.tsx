@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { format } from "date-fns";
@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PREMIER_LEAGUE_CLUBS, stadiumForClub } from "@/lib/premier-league";
 
 const RATINGS = [
   { key: "atmosphere", label: "Atmosphere", desc: "Noise, songs, the buzz" },
@@ -30,10 +32,21 @@ const schema = z.object({
 
 const LogMatch = () => {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
-  const [stadium, setStadium] = useState("");
+  const supportedTeam = profile?.supported_team ?? "";
+
+  // Stadium is determined by venue: home = supporter's club, away = opponent's club.
+  const stadium = useMemo(() => {
+    const club = isAway ? opponent : supportedTeam;
+    return stadiumForClub(club) ?? "";
+  }, [isAway, opponent, supportedTeam]);
+
+  const opponentOptions = useMemo(
+    () => PREMIER_LEAGUE_CLUBS.filter((c) => c.name !== supportedTeam),
+    [supportedTeam]
+  );
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
@@ -109,10 +122,26 @@ const LogMatch = () => {
 
         <div className="space-y-4 stat-card">
           <Field label="Opponent">
-            <Input value={opponent} onChange={(e) => setOpponent(e.target.value.slice(0, 80))} placeholder="e.g. Tottenham" className="h-12 bg-secondary border-0" />
+            <Select value={opponent} onValueChange={setOpponent}>
+              <SelectTrigger className="h-12 bg-secondary border-0">
+                <SelectValue placeholder="Pick a Premier League club" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72 bg-card">
+                {opponentOptions.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Stadium">
-            <Input value={stadium} onChange={(e) => setStadium(e.target.value.slice(0, 120))} placeholder="e.g. Tottenham Hotspur Stadium" className="h-12 bg-secondary border-0" />
+            <div className="h-12 flex items-center gap-2 rounded-md bg-secondary/60 px-3 border border-dashed border-border">
+              <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className={cn("text-sm font-bold truncate", stadium ? "text-foreground" : "text-muted-foreground")}>
+                {stadium || (isAway ? "Pick an opponent to set stadium" : supportedTeam ? "Your home ground" : "Set your club in profile")}
+              </span>
+            </div>
           </Field>
           <Field label="Date">
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12 bg-secondary border-0" />
