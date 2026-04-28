@@ -1,0 +1,173 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { format } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { AppShell } from "@/components/AppShell";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+
+const RATINGS = [
+  { key: "atmosphere", label: "Atmosphere", desc: "Noise, songs, the buzz" },
+  { key: "view_rating", label: "The View", desc: "Pitch visibility" },
+  { key: "scran", label: "The Scran", desc: "Food & drink" },
+  { key: "damage", label: "The Damage", desc: "Value for money" },
+] as const;
+
+const schema = z.object({
+  opponent: z.string().trim().min(2).max(80),
+  stadium: z.string().trim().min(2).max(120),
+  match_date: z.string().min(1),
+  note: z.string().max(500).optional(),
+});
+
+const LogMatch = () => {
+  const nav = useNavigate();
+  const { user } = useAuth();
+  const [isAway, setIsAway] = useState(true);
+  const [opponent, setOpponent] = useState("");
+  const [stadium, setStadium] = useState("");
+  const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
+  const [note, setNote] = useState("");
+  const [ratings, setRatings] = useState<Record<string, number>>({
+    atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const submit = async () => {
+    if (!user) return;
+    const parsed = schema.safeParse({ opponent, stadium, match_date: date, note });
+    if (!parsed.success) {
+      toast.error(parsed.error.issues[0].message);
+      return;
+    }
+    setSaving(true);
+    try {
+      // upsert stadium by name
+      let { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
+      let stadiumId = existing?.id;
+      if (!stadiumId) {
+        const { data: created, error: cErr } = await supabase.from("stadiums").insert({ name: stadium.trim() }).select("id").single();
+        if (cErr) throw cErr;
+        stadiumId = created.id;
+      }
+
+      const { error } = await supabase.from("matches").insert({
+        user_id: user.id,
+        stadium_id: stadiumId,
+        opponent: opponent.trim(),
+        match_date: date,
+        is_away: isAway,
+        atmosphere: ratings.atmosphere,
+        view_rating: ratings.view_rating,
+        scran: ratings.scran,
+        damage: ratings.damage,
+        note: note.trim() || null,
+      });
+      if (error) throw error;
+      toast.success("Match logged. Up the lads.");
+      nav("/");
+    } catch (err: any) {
+      toast.error(err.message ?? "Could not save");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <AppShell title="Log Match">
+      <div className="space-y-6">
+        {/* Home / Away toggle */}
+        <div className="grid grid-cols-2 gap-2 rounded-2xl bg-card p-1.5 border border-border">
+          {[
+            { v: false, l: "Home" },
+            { v: true, l: "Away" },
+          ].map((o) => (
+            <button
+              key={o.l}
+              onClick={() => setIsAway(o.v)}
+              className={cn(
+                "rounded-xl py-3 text-sm font-extrabold uppercase tracking-wider transition-all",
+                isAway === o.v
+                  ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                  : "text-muted-foreground"
+              )}
+            >
+              {o.l}
+            </button>
+          ))}
+        </div>
+
+        <div className="space-y-4 stat-card">
+          <Field label="Opponent">
+            <Input value={opponent} onChange={(e) => setOpponent(e.target.value.slice(0, 80))} placeholder="e.g. Tottenham" className="h-12 bg-secondary border-0" />
+          </Field>
+          <Field label="Stadium">
+            <Input value={stadium} onChange={(e) => setStadium(e.target.value.slice(0, 120))} placeholder="e.g. Tottenham Hotspur Stadium" className="h-12 bg-secondary border-0" />
+          </Field>
+          <Field label="Date">
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12 bg-secondary border-0" />
+          </Field>
+        </div>
+
+        {/* Scorecard */}
+        <div className="space-y-1">
+          <h2 className="font-display text-2xl tracking-wider">Scorecard</h2>
+          <p className="text-sm text-muted-foreground">Rate 1–10. Be honest, be brutal.</p>
+        </div>
+
+        <div className="space-y-3">
+          {RATINGS.map((r) => (
+            <RatingRow
+              key={r.key}
+              label={r.label}
+              desc={r.desc}
+              value={ratings[r.key]}
+              onChange={(v) => setRatings((s) => ({ ...s, [r.key]: v }))}
+            />
+          ))}
+        </div>
+
+        <Field label="Notes (optional)">
+          <Textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} placeholder="Best pie I've had in years..." className="bg-card border-border min-h-[88px]" />
+        </Field>
+
+        <Button onClick={submit} disabled={saving} className="w-full h-14 text-base font-extrabold bg-gradient-primary text-primary-foreground shadow-glow">
+          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Scorecard"}
+        </Button>
+      </div>
+    </AppShell>
+  );
+};
+
+const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="space-y-2">
+    <Label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">{label}</Label>
+    {children}
+  </div>
+);
+
+const RatingRow = ({ label, desc, value, onChange }: { label: string; desc: string; value: number; onChange: (v: number) => void }) => {
+  const color = value >= 7.5 ? "text-rating-good" : value >= 5 ? "text-rating-mid" : "text-rating-bad";
+  return (
+    <div className="stat-card">
+      <div className="flex items-baseline justify-between mb-3">
+        <div>
+          <p className="font-extrabold text-lg leading-tight">{label}</p>
+          <p className="text-xs text-muted-foreground">{desc}</p>
+        </div>
+        <span className={cn("font-display text-4xl tracking-wider", color)}>{value}</span>
+      </div>
+      <Slider min={1} max={10} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
+    </div>
+  );
+};
+
+export default LogMatch;
