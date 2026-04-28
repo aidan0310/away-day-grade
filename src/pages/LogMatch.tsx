@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { format } from "date-fns";
@@ -10,9 +10,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { PREMIER_LEAGUE_CLUBS, stadiumForClub } from "@/lib/premier-league";
 
 const RATINGS = [
   { key: "atmosphere", label: "Atmosphere", desc: "Noise, songs, the buzz" },
