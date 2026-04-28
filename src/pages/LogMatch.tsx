@@ -32,7 +32,7 @@ const schema = z.object({
 
 const LogMatch = () => {
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
   const [stadium, setStadium] = useState("");
