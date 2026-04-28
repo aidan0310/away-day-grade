@@ -24,6 +24,7 @@ export type Database = {
           match_date: string
           note: string | null
           opponent: string
+          pint_price: number | null
           scran: number
           stadium_id: string
           user_id: string
@@ -38,6 +39,7 @@ export type Database = {
           match_date: string
           note?: string | null
           opponent: string
+          pint_price?: number | null
           scran: number
           stadium_id: string
           user_id: string
@@ -52,6 +54,7 @@ export type Database = {
           match_date?: string
           note?: string | null
           opponent?: string
+          pint_price?: number | null
           scran?: number
           stadium_id?: string
           user_id?: string
