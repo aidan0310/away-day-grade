@@ -18,7 +18,7 @@ const RATINGS = [
   { key: "atmosphere", label: "Atmosphere", desc: "Noise, songs, the buzz" },
   { key: "view_rating", label: "The View", desc: "Pitch visibility" },
   { key: "scran", label: "The Scran", desc: "Food & drink" },
-  { key: "damage", label: "The Damage", desc: "Value for money" },
+  { key: "damage", label: "The Damage", desc: "Value for money (1–10)" },
 ] as const;
 
 const schema = z.object({
