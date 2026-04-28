@@ -12,6 +12,7 @@ export type ReviewCardData = {
   view_rating: number;
   scran: number;
   damage: number;
+  pint_price: number | null;
   note: string | null;
   stadium: { id: string; name: string };
   profile: { display_name: string; supported_team: string | null } | null;
