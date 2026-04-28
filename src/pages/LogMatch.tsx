@@ -122,10 +122,26 @@ const LogMatch = () => {
 
         <div className="space-y-4 stat-card">
           <Field label="Opponent">
-            <Input value={opponent} onChange={(e) => setOpponent(e.target.value.slice(0, 80))} placeholder="e.g. Tottenham" className="h-12 bg-secondary border-0" />
+            <Select value={opponent} onValueChange={setOpponent}>
+              <SelectTrigger className="h-12 bg-secondary border-0">
+                <SelectValue placeholder="Pick a Premier League club" />
+              </SelectTrigger>
+              <SelectContent className="max-h-72 bg-card">
+                {opponentOptions.map((c) => (
+                  <SelectItem key={c.name} value={c.name}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Stadium">
-            <Input value={stadium} onChange={(e) => setStadium(e.target.value.slice(0, 120))} placeholder="e.g. Tottenham Hotspur Stadium" className="h-12 bg-secondary border-0" />
+            <div className="h-12 flex items-center gap-2 rounded-md bg-secondary/60 px-3 border border-dashed border-border">
+              <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className={cn("text-sm font-bold truncate", stadium ? "text-foreground" : "text-muted-foreground")}>
+                {stadium || (isAway ? "Pick an opponent to set stadium" : supportedTeam ? "Your home ground" : "Set your club in profile")}
+              </span>
+            </div>
           </Field>
           <Field label="Date">
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12 bg-secondary border-0" />
