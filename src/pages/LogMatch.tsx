@@ -146,9 +146,12 @@ const LogMatch = () => {
           </Field>
           <Field label="Stadium">
             <div className="h-12 flex items-center gap-2 rounded-md bg-secondary/60 px-3 border border-dashed border-border">
-              <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
               <span className={cn("text-sm font-bold truncate", stadium ? "text-foreground" : "text-muted-foreground")}>
-                {stadium || (isAway ? "Pick an opponent to set stadium" : supportedTeam ? "Your home ground" : "Set your club in profile")}
+                {stadium ||
+                  (isAway
+                    ? "Pick an opponent to set stadium"
+                    : "Set your club in profile to auto-fill")}
               </span>
             </div>
           </Field>
