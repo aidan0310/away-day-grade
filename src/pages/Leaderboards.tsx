@@ -59,7 +59,7 @@ const Leaderboards = () => {
       const [{ data: m }, { data: s }] = await Promise.all([
         supabase
           .from("matches")
-          .select("stadium_id, is_away, atmosphere, view_rating, scran, damage, pint_price"),
+          .select("stadium_id, is_away, opponent, atmosphere, view_rating, scran, damage, pint_price"),
         supabase.from("stadiums").select("id, name"),
       ]);
       setMatches((m ?? []) as Match[]);
