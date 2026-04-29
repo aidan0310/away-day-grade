@@ -26,6 +26,7 @@ const TABS: { key: TabKey; label: string; sub: string }[] = [
 type Match = {
   stadium_id: string;
   is_away: boolean;
+  opponent: string;
   atmosphere: number;
   view_rating: number;
   scran: number;
