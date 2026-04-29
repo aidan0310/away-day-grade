@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { PREMIER_LEAGUE_CLUBS, stadiumForClub } from "@/lib/premier-league";
+import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
 
 // Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
 // different meanings depending on whether the user attended as a Home or Away fan.
@@ -45,16 +45,17 @@ const LogMatch = () => {
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
   const supportedTeam = profile?.supported_team ?? "";
+  const normalizedSupportedTeam = normalizeClubName(supportedTeam);
 
   // Stadium is determined by venue: home = supporter's club, away = opponent's club.
   const stadium = useMemo(() => {
-    const club = isAway ? opponent : supportedTeam;
+    const club = isAway ? opponent : normalizedSupportedTeam;
     return stadiumForClub(club) ?? "";
-  }, [isAway, opponent, supportedTeam]);
+  }, [isAway, opponent, normalizedSupportedTeam]);
 
   const opponentOptions = useMemo(
-    () => PREMIER_LEAGUE_CLUBS.filter((c) => c.name !== supportedTeam),
-    [supportedTeam]
+    () => PREMIER_LEAGUE_CLUBS.filter((c) => c.name !== normalizedSupportedTeam),
+    [normalizedSupportedTeam]
   );
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
@@ -70,7 +71,7 @@ const LogMatch = () => {
       toast.error(
         isAway
           ? "Pick an opponent to set the stadium."
-          : "Set your supported club in your profile first."
+          : "Set your Premier League club in your profile first."
       );
       return;
     }
@@ -82,7 +83,7 @@ const LogMatch = () => {
     setSaving(true);
     try {
       // upsert stadium by name
-      let { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
+      const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
         const { data: created, error: cErr } = await supabase.from("stadiums").insert({ name: stadium.trim() }).select("id").single();
@@ -106,8 +107,8 @@ const LogMatch = () => {
       if (error) throw error;
       toast.success("Match logged. Up the lads.");
       nav("/");
-    } catch (err: any) {
-      toast.error(err.message ?? "Could not save");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
       setSaving(false);
     }
@@ -159,7 +160,9 @@ const LogMatch = () => {
                 {stadium ||
                   (isAway
                     ? "Pick an opponent to set stadium"
-                    : "Set your club in profile to auto-fill")}
+                    : supportedTeam
+                      ? "Your saved club is not a Premier League club"
+                      : "Set your club in profile to auto-fill")}
               </span>
             </div>
           </Field>
