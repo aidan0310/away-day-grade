@@ -164,7 +164,7 @@ const LogMatch = () => {
         </div>
 
         <div className="space-y-3">
-          {RATINGS.map((r) => (
+          {(isAway ? AWAY_RATINGS : HOME_RATINGS).map((r) => (
             <RatingRow
               key={r.key}
               label={r.label}
