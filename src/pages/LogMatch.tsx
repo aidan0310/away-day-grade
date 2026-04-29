@@ -16,11 +16,20 @@ import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, stadiumForClub } from "@/lib/premier-league";
 
-const RATINGS = [
-  { key: "atmosphere", label: "Atmosphere", desc: "Noise, songs, the buzz" },
-  { key: "view_rating", label: "The View", desc: "Pitch visibility" },
-  { key: "scran", label: "The Scran", desc: "Food & drink" },
+// Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
+// different meanings depending on whether the user attended as a Home or Away fan.
+const AWAY_RATINGS = [
+  { key: "atmosphere", label: "Atmosphere", desc: "Away end noise & buzz" },
+  { key: "view_rating", label: "The View", desc: "Pitch visibility from away end" },
+  { key: "scran", label: "Scran & Pints", desc: "Food & drink quality" },
   { key: "damage", label: "The Damage", desc: "Value for money (1–10)" },
+] as const;
+
+const HOME_RATINGS = [
+  { key: "atmosphere", label: "Home Atmosphere", desc: "Your end's noise & songs" },
+  { key: "view_rating", label: "Opposition Fan Noise", desc: "How loud were the away lot?" },
+  { key: "scran", label: "Team Performance", desc: "How did your side play?" },
+  { key: "damage", label: "Stadium Logistics", desc: "Ease of entry, queues, getting out" },
 ] as const;
 
 const schema = z.object({
