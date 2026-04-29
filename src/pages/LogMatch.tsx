@@ -83,7 +83,7 @@ const LogMatch = () => {
     setSaving(true);
     try {
       // upsert stadium by name
-      let { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
+      const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
         const { data: created, error: cErr } = await supabase.from("stadiums").insert({ name: stadium.trim() }).select("id").single();
@@ -107,8 +107,8 @@ const LogMatch = () => {
       if (error) throw error;
       toast.success("Match logged. Up the lads.");
       nav("/");
-    } catch (err: any) {
-      toast.error(err.message ?? "Could not save");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
       setSaving(false);
     }
