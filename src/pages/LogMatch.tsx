@@ -19,7 +19,7 @@ import { PREMIER_LEAGUE_CLUBS, stadiumForClub } from "@/lib/premier-league";
 // Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
 // different meanings depending on whether the user attended as a Home or Away fan.
 const AWAY_RATINGS = [
-  { key: "atmosphere", label: "Atmosphere", desc: "Away end noise & buzz" },
+  { key: "atmosphere", label: "Atmosphere", desc: "Home (opposition) fans' noise & buzz" },
   { key: "view_rating", label: "The View", desc: "Pitch visibility from away end" },
   { key: "scran", label: "Scran & Pints", desc: "Food & drink quality" },
   { key: "damage", label: "The Damage", desc: "Value for money (1–10)" },
