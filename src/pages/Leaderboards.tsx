@@ -26,6 +26,7 @@ const TABS: { key: TabKey; label: string; sub: string }[] = [
 type Match = {
   stadium_id: string;
   is_away: boolean;
+  opponent: string;
   atmosphere: number;
   view_rating: number;
   scran: number;
@@ -58,7 +59,7 @@ const Leaderboards = () => {
       const [{ data: m }, { data: s }] = await Promise.all([
         supabase
           .from("matches")
-          .select("stadium_id, is_away, atmosphere, view_rating, scran, damage, pint_price"),
+          .select("stadium_id, is_away, opponent, atmosphere, view_rating, scran, damage, pint_price"),
         supabase.from("stadiums").select("id, name"),
       ]);
       setMatches((m ?? []) as Match[]);
@@ -82,10 +83,12 @@ const Leaderboards = () => {
     // Decide what each match contributes for the active tab.
     const sums = new Map<string, { sum: number; n: number }>();
     matches.forEach((mt) => {
-      const club = stadiumIdToClub.get(mt.stadium_id);
-      if (!club) return;
+      const stadiumClub = stadiumIdToClub.get(mt.stadium_id);
 
+      // Default: credit the stadium's club (the venue being reviewed).
+      let club: string | undefined = stadiumClub;
       let value: number | null = null;
+
       switch (tab) {
         case "atmosphere":
           if (mt.is_away) value = mt.atmosphere;
@@ -100,11 +103,16 @@ const Leaderboards = () => {
           if (mt.pint_price != null) value = Number(mt.pint_price);
           break;
         case "away_support":
-          // Home fans rating opposition fan noise lives in view_rating when is_away=false.
-          if (!mt.is_away) value = mt.view_rating;
+          // Home fans rate the visiting (away) team's fans via "Opposition Fan Noise"
+          // (stored in view_rating when is_away=false). Credit the OPPONENT, not the host.
+          if (!mt.is_away) {
+            value = mt.view_rating;
+            const normalizedOpp = normalizeClubName(mt.opponent ?? "");
+            club = PREMIER_LEAGUE_CLUBS.find((c) => c.name === normalizedOpp)?.name;
+          }
           break;
       }
-      if (value == null) return;
+      if (value == null || !club) return;
       const cur = sums.get(club) ?? { sum: 0, n: 0 };
       cur.sum += value;
       cur.n += 1;
