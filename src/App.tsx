@@ -13,6 +13,7 @@ import StadiumDetail from "./pages/StadiumDetail";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
+import { ClubTheme } from "@/components/ClubTheme";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ const App = () => (
       <Sonner position="top-center" />
       <BrowserRouter>
         <AuthProvider>
+          <ClubTheme />
           <Routes>
             <Route path="/auth" element={<RedirectIfAuthed><Auth /></RedirectIfAuthed>} />
             <Route path="/onboarding" element={<Protected requireTeam={false}><Onboarding /></Protected>} />
