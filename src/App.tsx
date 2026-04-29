@@ -10,6 +10,7 @@ import Feed from "./pages/Feed";
 import LogMatch from "./pages/LogMatch";
 import Stadiums from "./pages/Stadiums";
 import StadiumDetail from "./pages/StadiumDetail";
+import Leaderboards from "./pages/Leaderboards";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/log" element={<Protected><LogMatch /></Protected>} />
             <Route path="/stadiums" element={<Protected><Stadiums /></Protected>} />
             <Route path="/stadium/:id" element={<Protected><StadiumDetail /></Protected>} />
+            <Route path="/leaderboards" element={<Protected><Leaderboards /></Protected>} />
             <Route path="/profile" element={<Protected><Profile /></Protected>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

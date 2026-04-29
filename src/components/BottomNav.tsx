@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Plus, User, Trophy } from "lucide-react";
+import { Home, Plus, User, Trophy, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { to: "/", icon: Home, label: "Feed" },
   { to: "/stadiums", icon: Trophy, label: "Stadiums" },
   { to: "/log", icon: Plus, label: "Log", primary: true },
+  { to: "/leaderboards", icon: BarChart3, label: "Boards" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
 
