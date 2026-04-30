@@ -100,7 +100,7 @@ const Leaderboards = () => {
           if (mt.is_away) value = mt.view_rating;
           break;
         case "price":
-          if (mt.pint_price != null) value = Number(mt.pint_price);
+          if (mt.is_away && mt.pint_price != null) value = Number(mt.pint_price);
           break;
         case "away_support":
           // Home fans rate the visiting (away) team's fans via "Opposition Fan Noise"

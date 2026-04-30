@@ -19,7 +19,7 @@ const Stadiums = () => {
   useEffect(() => {
     (async () => {
       const { data: stadiums } = await supabase.from("stadiums").select("id, name");
-      const { data: matches } = await supabase.from("matches").select("stadium_id, atmosphere, view_rating, scran, damage");
+      const { data: matches } = await supabase.from("matches").select("stadium_id, atmosphere, view_rating, scran, damage").eq("is_away", true);
       const map = new Map<string, { sum: number; n: number }>();
       (matches ?? []).forEach((m: any) => {
         const avg = (m.atmosphere + m.view_rating + m.scran + m.damage) / 4;
