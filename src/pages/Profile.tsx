@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -6,7 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { ReviewCard, ReviewCardData } from "@/components/ReviewCard";
 import { LetterGrade } from "@/components/GradePill";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2 } from "lucide-react";
+import { LogOut, Loader2, Trophy } from "lucide-react";
 
 const Profile = () => {
   const nav = useNavigate();
@@ -63,6 +63,8 @@ const Profile = () => {
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Avg Grade Given</span>
           </div>
         </div>
+
+        <SeasonMotmLeaderboard reviews={reviews} />
 
         <div className="space-y-3">
           <h2 className="font-display text-2xl tracking-wider">Your Match Diary</h2>
