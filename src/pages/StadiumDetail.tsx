@@ -88,7 +88,13 @@ const StadiumDetail = () => {
               <h2 className="font-display text-2xl tracking-wider">Reviews</h2>
               {reviews.length === 0 ? (
                 <p className="text-muted-foreground text-sm">No reviews yet.</p>
-              ) : reviews.map(r => <ReviewCard key={r.id} data={r} />)}
+              ) : reviews.map(r => (
+                <ReviewCard
+                  key={r.id}
+                  data={r}
+                  onDeleted={(id) => setReviews((rs) => rs.filter((x) => x.id !== id))}
+                />
+              ))}
             </div>
           </>
         )}
