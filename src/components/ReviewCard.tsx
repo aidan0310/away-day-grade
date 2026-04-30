@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, MapPin, Trophy } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { GradePill } from "./GradePill";
 
@@ -14,6 +14,8 @@ export type ReviewCardData = {
   damage: number;
   pint_price: number | null;
   note: string | null;
+  motm_player?: string | null;
+  motm_comment?: string | null;
   stadium: { id: string; name: string };
   profile: { display_name: string; supported_team: string | null } | null;
 };
@@ -57,6 +59,19 @@ export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
         <div className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2 border border-border/50">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pint Price</span>
           <span className="font-display text-xl tracking-wider text-primary">£{Number(data.pint_price).toFixed(2)}</span>
+        </div>
+      )}
+
+      {data.motm_player && (
+        <div className="rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/30 px-3 py-2.5 space-y-1">
+          <div className="flex items-center gap-2">
+            <Trophy className="h-4 w-4 text-primary shrink-0" />
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Fans' MOTM</span>
+            <span className="font-extrabold text-sm truncate">{data.motm_player}</span>
+          </div>
+          {data.motm_comment && (
+            <p className="text-xs text-foreground/75 italic pl-6">"{data.motm_comment}"</p>
+          )}
         </div>
       )}
 
