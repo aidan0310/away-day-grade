@@ -49,8 +49,8 @@ export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
       <div className="grid grid-cols-4 gap-2">
         <Stat label={data.is_away ? "Atmos" : "Home Atmos"} value={data.atmosphere} />
         <Stat label={data.is_away ? "View" : "Away Fans"} value={data.view_rating} />
-        <Stat label="Scran" value={data.scran} />
-        <Stat label="Damage" value={data.damage} />
+        <Stat label={data.is_away ? "Scran" : "Team"} value={data.scran} />
+        <Stat label={data.is_away ? "Damage" : "Logistics"} value={data.damage} />
       </div>
 
       {data.pint_price != null && (
