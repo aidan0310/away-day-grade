@@ -44,6 +44,8 @@ const schema = z.object({
 
 const LogMatch = () => {
   const nav = useNavigate();
+  const { id: editId } = useParams<{ id?: string }>();
+  const isEditing = Boolean(editId);
   const { user, profile } = useAuth();
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
@@ -69,11 +71,50 @@ const LogMatch = () => {
   const [motmPlayer, setMotmPlayer] = useState("");
   const [motmComment, setMotmComment] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(isEditing);
 
-  // The MOTM is voted from the user's own team (the home club if a home match,
-  // the user's supported club if they travelled away).
-  const motmClub = isAway ? normalizedSupportedTeam : normalizedSupportedTeam;
+  // The MOTM is voted from the user's own supported club regardless of venue.
+  const motmClub = normalizedSupportedTeam;
   const motmSquad = useMemo(() => squadFor(motmClub), [motmClub]);
+
+  // Hydrate form when editing an existing match.
+  useEffect(() => {
+    if (!isEditing || !editId || !user) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("*")
+        .eq("id", editId)
+        .maybeSingle();
+      if (cancelled) return;
+      if (error || !data) {
+        toast.error("Couldn't load that review.");
+        nav("/profile");
+        return;
+      }
+      if (data.user_id !== user.id) {
+        toast.error("You can only edit your own reviews.");
+        nav("/profile");
+        return;
+      }
+      setIsAway(data.is_away);
+      setOpponent(data.opponent);
+      setDate(data.match_date);
+      setNote(data.note ?? "");
+      setPintPrice(data.pint_price != null ? String(data.pint_price) : "");
+      setRatings({
+        atmosphere: data.atmosphere,
+        view_rating: data.view_rating,
+        scran: data.scran,
+        damage: data.damage,
+      });
+      setMotmPlayer(data.motm_player ?? "");
+      setMotmComment(data.motm_comment ?? "");
+      setLoadingExisting(false);
+    })();
+    return () => { cancelled = true; };
+  }, [isEditing, editId, user, nav]);
 
   const submit = async () => {
     if (!user) return;
@@ -95,7 +136,6 @@ const LogMatch = () => {
     }
     setSaving(true);
     try {
-      // upsert stadium by name
       const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
@@ -104,8 +144,7 @@ const LogMatch = () => {
         stadiumId = created.id;
       }
 
-      const { error } = await supabase.from("matches").insert({
-        user_id: user.id,
+      const payload = {
         stadium_id: stadiumId,
         opponent: opponent.trim(),
         match_date: date,
@@ -118,10 +157,25 @@ const LogMatch = () => {
         note: note.trim() || null,
         motm_player: motmPlayer.trim(),
         motm_comment: motmComment.trim() || null,
-      });
-      if (error) throw error;
-      toast.success("Match logged. Up the lads.");
-      nav("/");
+      };
+
+      if (isEditing && editId) {
+        const { error } = await supabase
+          .from("matches")
+          .update(payload)
+          .eq("id", editId)
+          .eq("user_id", user.id);
+        if (error) throw error;
+        toast.success("Review updated.");
+        nav("/profile");
+      } else {
+        const { error } = await supabase
+          .from("matches")
+          .insert({ ...payload, user_id: user.id });
+        if (error) throw error;
+        toast.success("Match logged. Up the lads.");
+        nav("/");
+      }
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
