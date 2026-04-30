@@ -1,10 +1,26 @@
-import { Link } from "react-router-dom";
-import { Calendar, MapPin, Trophy } from "lucide-react";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Calendar, MapPin, Trophy, Trash2, Pencil, Loader2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { GradePill } from "./GradePill";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export type ReviewCardData = {
   id: string;
+  user_id?: string;
   opponent: string;
   match_date: string;
   is_away: boolean;
@@ -23,8 +39,39 @@ export type ReviewCardData = {
 const avg = (m: ReviewCardData) =>
   (m.atmosphere + m.view_rating + m.scran + m.damage) / 4;
 
-export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
+export const ReviewCard = ({
+  data,
+  onDeleted,
+}: {
+  data: ReviewCardData;
+  /** Optional callback fired after a successful delete so the parent can refresh stats/lists. */
+  onDeleted?: (id: string) => void;
+}) => {
   const grade = avg(data);
+  const { user } = useAuth();
+  const nav = useNavigate();
+  const isOwner = !!user && !!data.user_id && user.id === data.user_id;
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!isOwner) return;
+    setDeleting(true);
+    const { error } = await supabase
+      .from("matches")
+      .delete()
+      .eq("id", data.id)
+      .eq("user_id", user!.id);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message || "Couldn't delete review.");
+      return;
+    }
+    toast.success("Review removed from your Passport.");
+    setConfirmOpen(false);
+    onDeleted?.(data.id);
+  };
+
   return (
     <article className="stat-card space-y-4 transition-all hover:border-primary/40 hover:shadow-elevated">
       <header className="flex items-start justify-between gap-3">
@@ -81,13 +128,57 @@ export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
         </p>
       )}
 
-      <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border">
-        <span className="font-semibold text-foreground/70">@{data.profile?.display_name ?? "fan"}</span>
-        <span className="flex items-center gap-1">
-          <Calendar className="h-3 w-3" />
-          {format(parseISO(data.match_date), "d MMM yyyy")}
-        </span>
+      <footer className="flex items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t border-border">
+        <span className="font-semibold text-foreground/70 truncate">@{data.profile?.display_name ?? "fan"}</span>
+        <div className="flex items-center gap-1">
+          <span className="flex items-center gap-1 mr-1">
+            <Calendar className="h-3 w-3" />
+            {format(parseISO(data.match_date), "d MMM yyyy")}
+          </span>
+          {isOwner && (
+            <>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Edit review"
+                onClick={() => nav(`/log/${data.id}`)}
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                aria-label="Delete review"
+                onClick={() => setConfirmOpen(true)}
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
       </footer>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove this match from your Passport and stats.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 };
