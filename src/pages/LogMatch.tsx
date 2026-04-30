@@ -266,4 +266,95 @@ const RatingRow = ({ label, desc, value, onChange }: { label: string; desc: stri
   );
 };
 
+
+const MotmPicker = ({
+  club, squad, player, comment, onPlayer, onComment,
+}: {
+  club: string;
+  squad: string[];
+  player: string;
+  comment: string;
+  onPlayer: (v: string) => void;
+  onComment: (v: string) => void;
+}) => {
+  const [query, setQuery] = useState("");
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return squad;
+    return squad.filter((p) => p.toLowerCase().includes(q));
+  }, [query, squad]);
+
+  return (
+    <div className="stat-card space-y-4">
+      <div className="flex items-center gap-2">
+        <Trophy className="h-5 w-5 text-primary" />
+        <div className="flex-1">
+          <p className="font-extrabold text-lg leading-tight">Man of the Match</p>
+          <p className="text-xs text-muted-foreground">
+            {club ? `Pick from the ${club} squad` : "Set your supported club to vote"}
+          </p>
+        </div>
+      </div>
+
+      {!squad.length ? (
+        <p className="text-sm text-muted-foreground italic">
+          No squad list available for this club yet.
+        </p>
+      ) : (
+        <>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search squad..."
+              className="h-11 bg-secondary border-0 pl-9"
+            />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
+            {filtered.map((name) => {
+              const active = player === name;
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => onPlayer(name)}
+                  className={cn(
+                    "rounded-xl px-3 py-2.5 text-sm font-bold text-left transition-all border",
+                    active
+                      ? "bg-gradient-primary text-primary-foreground border-transparent shadow-glow"
+                      : "bg-secondary/60 border-border hover:border-primary/40"
+                  )}
+                >
+                  {active && <Trophy className="inline h-3.5 w-3.5 mr-1.5 -mt-0.5" />}
+                  {name}
+                </button>
+              );
+            })}
+            {filtered.length === 0 && (
+              <p className="col-span-full text-xs text-muted-foreground py-2">
+                No players match "{query}".
+              </p>
+            )}
+          </div>
+        </>
+      )}
+
+      {player && (
+        <div className="space-y-2 pt-1">
+          <Label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
+            Your Shout (optional)
+          </Label>
+          <Input
+            value={comment}
+            onChange={(e) => onComment(e.target.value.slice(0, 140))}
+            placeholder="Carried the midfield today..."
+            className="h-11 bg-secondary border-0"
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default LogMatch;
