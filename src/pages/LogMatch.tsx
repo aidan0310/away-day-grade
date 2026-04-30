@@ -38,6 +38,8 @@ const schema = z.object({
   stadium: z.string().trim().min(2).max(120),
   match_date: z.string().min(1),
   note: z.string().max(500).optional(),
+  motm_player: z.string().trim().min(1, "Pick a Man of the Match"),
+  motm_comment: z.string().max(140).optional(),
 });
 
 const LogMatch = () => {
@@ -64,7 +66,14 @@ const LogMatch = () => {
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
+  const [motmPlayer, setMotmPlayer] = useState("");
+  const [motmComment, setMotmComment] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // The MOTM is voted from the user's own team (the home club if a home match,
+  // the user's supported club if they travelled away).
+  const motmClub = isAway ? normalizedSupportedTeam : normalizedSupportedTeam;
+  const motmSquad = useMemo(() => squadFor(motmClub), [motmClub]);
 
   const submit = async () => {
     if (!user) return;
