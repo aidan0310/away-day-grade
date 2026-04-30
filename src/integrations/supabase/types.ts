@@ -22,8 +22,6 @@ export type Database = {
           id: string
           is_away: boolean
           match_date: string
-          motm_comment: string | null
-          motm_player: string
           note: string | null
           opponent: string
           pint_price: number | null
@@ -39,8 +37,6 @@ export type Database = {
           id?: string
           is_away?: boolean
           match_date: string
-          motm_comment?: string | null
-          motm_player: string
           note?: string | null
           opponent: string
           pint_price?: number | null
@@ -56,8 +52,6 @@ export type Database = {
           id?: string
           is_away?: boolean
           match_date?: string
-          motm_comment?: string | null
-          motm_player?: string
           note?: string | null
           opponent?: string
           pint_price?: number | null

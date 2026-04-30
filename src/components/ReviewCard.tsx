@@ -1,26 +1,10 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Trophy, Trash2, Pencil, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Calendar, MapPin } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { GradePill } from "./GradePill";
-import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 export type ReviewCardData = {
   id: string;
-  user_id?: string;
   opponent: string;
   match_date: string;
   is_away: boolean;
@@ -30,8 +14,6 @@ export type ReviewCardData = {
   damage: number;
   pint_price: number | null;
   note: string | null;
-  motm_player?: string | null;
-  motm_comment?: string | null;
   stadium: { id: string; name: string };
   profile: { display_name: string; supported_team: string | null } | null;
 };
@@ -39,39 +21,8 @@ export type ReviewCardData = {
 const avg = (m: ReviewCardData) =>
   (m.atmosphere + m.view_rating + m.scran + m.damage) / 4;
 
-export const ReviewCard = ({
-  data,
-  onDeleted,
-}: {
-  data: ReviewCardData;
-  /** Optional callback fired after a successful delete so the parent can refresh stats/lists. */
-  onDeleted?: (id: string) => void;
-}) => {
+export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
   const grade = avg(data);
-  const { user } = useAuth();
-  const nav = useNavigate();
-  const isOwner = !!user && !!data.user_id && user.id === data.user_id;
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-
-  const handleDelete = async () => {
-    if (!isOwner) return;
-    setDeleting(true);
-    const { error } = await supabase
-      .from("matches")
-      .delete()
-      .eq("id", data.id)
-      .eq("user_id", user!.id);
-    setDeleting(false);
-    if (error) {
-      toast.error(error.message || "Couldn't delete review.");
-      return;
-    }
-    toast.success("Review removed from your Passport.");
-    setConfirmOpen(false);
-    onDeleted?.(data.id);
-  };
-
   return (
     <article className="stat-card space-y-4 transition-all hover:border-primary/40 hover:shadow-elevated">
       <header className="flex items-start justify-between gap-3">
@@ -109,76 +60,19 @@ export const ReviewCard = ({
         </div>
       )}
 
-      {data.motm_player && (
-        <div className="rounded-xl bg-gradient-to-r from-primary/15 to-primary/5 border border-primary/30 px-3 py-2.5 space-y-1">
-          <div className="flex items-center gap-2">
-            <Trophy className="h-4 w-4 text-primary shrink-0" />
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Fans' MOTM</span>
-            <span className="font-extrabold text-sm truncate">{data.motm_player}</span>
-          </div>
-          {data.motm_comment && (
-            <p className="text-xs text-foreground/75 italic pl-6">"{data.motm_comment}"</p>
-          )}
-        </div>
-      )}
-
       {data.note && (
         <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary pl-3">
           "{data.note}"
         </p>
       )}
 
-      <footer className="flex items-center justify-between gap-2 text-xs text-muted-foreground pt-1 border-t border-border">
-        <span className="font-semibold text-foreground/70 truncate">@{data.profile?.display_name ?? "fan"}</span>
-        <div className="flex items-center gap-1">
-          <span className="flex items-center gap-1 mr-1">
-            <Calendar className="h-3 w-3" />
-            {format(parseISO(data.match_date), "d MMM yyyy")}
-          </span>
-          {isOwner && (
-            <>
-              <Button
-                size="icon"
-                variant="ghost"
-                aria-label="Edit review"
-                onClick={() => nav(`/log/${data.id}`)}
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                aria-label="Delete review"
-                onClick={() => setConfirmOpen(true)}
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </>
-          )}
-        </div>
+      <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border">
+        <span className="font-semibold text-foreground/70">@{data.profile?.display_name ?? "fan"}</span>
+        <span className="flex items-center gap-1">
+          <Calendar className="h-3 w-3" />
+          {format(parseISO(data.match_date), "d MMM yyyy")}
+        </span>
       </footer>
-
-      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove this match from your Passport and stats.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleDelete(); }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </article>
   );
 };

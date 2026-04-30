@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -12,10 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Loader2, MapPin, Trophy, Search } from "lucide-react";
+import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
-import { squadFor } from "@/lib/squads";
 
 // Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
 // different meanings depending on whether the user attended as a Home or Away fan.
@@ -38,14 +37,10 @@ const schema = z.object({
   stadium: z.string().trim().min(2).max(120),
   match_date: z.string().min(1),
   note: z.string().max(500).optional(),
-  motm_player: z.string().trim().min(1, "Pick a Man of the Match"),
-  motm_comment: z.string().max(140).optional(),
 });
 
 const LogMatch = () => {
   const nav = useNavigate();
-  const { id: editId } = useParams<{ id?: string }>();
-  const isEditing = Boolean(editId);
   const { user, profile } = useAuth();
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
@@ -68,53 +63,7 @@ const LogMatch = () => {
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
-  const [motmPlayer, setMotmPlayer] = useState("");
-  const [motmComment, setMotmComment] = useState("");
   const [saving, setSaving] = useState(false);
-  const [loadingExisting, setLoadingExisting] = useState(isEditing);
-
-  // The MOTM is voted from the user's own supported club regardless of venue.
-  const motmClub = normalizedSupportedTeam;
-  const motmSquad = useMemo(() => squadFor(motmClub), [motmClub]);
-
-  // Hydrate form when editing an existing match.
-  useEffect(() => {
-    if (!isEditing || !editId || !user) return;
-    let cancelled = false;
-    (async () => {
-      const { data, error } = await supabase
-        .from("matches")
-        .select("*")
-        .eq("id", editId)
-        .maybeSingle();
-      if (cancelled) return;
-      if (error || !data) {
-        toast.error("Couldn't load that review.");
-        nav("/profile");
-        return;
-      }
-      if (data.user_id !== user.id) {
-        toast.error("You can only edit your own reviews.");
-        nav("/profile");
-        return;
-      }
-      setIsAway(data.is_away);
-      setOpponent(data.opponent);
-      setDate(data.match_date);
-      setNote(data.note ?? "");
-      setPintPrice(data.pint_price != null ? String(data.pint_price) : "");
-      setRatings({
-        atmosphere: data.atmosphere,
-        view_rating: data.view_rating,
-        scran: data.scran,
-        damage: data.damage,
-      });
-      setMotmPlayer(data.motm_player ?? "");
-      setMotmComment(data.motm_comment ?? "");
-      setLoadingExisting(false);
-    })();
-    return () => { cancelled = true; };
-  }, [isEditing, editId, user, nav]);
 
   const submit = async () => {
     if (!user) return;
@@ -126,16 +75,14 @@ const LogMatch = () => {
       );
       return;
     }
-    const parsed = schema.safeParse({
-      opponent, stadium, match_date: date, note,
-      motm_player: motmPlayer, motm_comment: motmComment,
-    });
+    const parsed = schema.safeParse({ opponent, stadium, match_date: date, note });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
     }
     setSaving(true);
     try {
+      // upsert stadium by name
       const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
@@ -144,7 +91,8 @@ const LogMatch = () => {
         stadiumId = created.id;
       }
 
-      const payload = {
+      const { error } = await supabase.from("matches").insert({
+        user_id: user.id,
         stadium_id: stadiumId,
         opponent: opponent.trim(),
         match_date: date,
@@ -155,27 +103,10 @@ const LogMatch = () => {
         damage: ratings.damage,
         pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
         note: note.trim() || null,
-        motm_player: motmPlayer.trim(),
-        motm_comment: motmComment.trim() || null,
-      };
-
-      if (isEditing && editId) {
-        const { error } = await supabase
-          .from("matches")
-          .update(payload)
-          .eq("id", editId)
-          .eq("user_id", user.id);
-        if (error) throw error;
-        toast.success("Review updated.");
-        nav("/profile");
-      } else {
-        const { error } = await supabase
-          .from("matches")
-          .insert({ ...payload, user_id: user.id });
-        if (error) throw error;
-        toast.success("Match logged. Up the lads.");
-        nav("/");
-      }
+      });
+      if (error) throw error;
+      toast.success("Match logged. Up the lads.");
+      nav("/");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
@@ -183,18 +114,8 @@ const LogMatch = () => {
     }
   };
 
-  if (loadingExisting) {
-    return (
-      <AppShell title="Edit Match">
-        <div className="flex justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </AppShell>
-    );
-  }
-
   return (
-    <AppShell title={isEditing ? "Edit Match" : "Log Match"}>
+    <AppShell title="Log Match">
       <div className="space-y-6">
         {/* Home / Away toggle */}
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-card p-1.5 border border-border">
@@ -285,22 +206,12 @@ const LogMatch = () => {
           <p className="text-xs text-muted-foreground">Helps fans see the average pint price at this ground.</p>
         </Field>
 
-        {/* Man of the Match */}
-        <MotmPicker
-          club={motmClub}
-          squad={motmSquad}
-          player={motmPlayer}
-          comment={motmComment}
-          onPlayer={setMotmPlayer}
-          onComment={setMotmComment}
-        />
-
         <Field label="Notes (optional)">
           <Textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} placeholder="Best pie I've had in years..." className="bg-card border-border min-h-[88px]" />
         </Field>
 
         <Button onClick={submit} disabled={saving} className="w-full h-14 text-base font-extrabold bg-gradient-primary text-primary-foreground shadow-glow">
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : (isEditing ? "Update Review" : "Submit Scorecard")}
+          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Scorecard"}
         </Button>
       </div>
     </AppShell>
@@ -326,97 +237,6 @@ const RatingRow = ({ label, desc, value, onChange }: { label: string; desc: stri
         <span className={cn("font-display text-4xl tracking-wider", color)}>{value}</span>
       </div>
       <Slider min={1} max={10} step={1} value={[value]} onValueChange={(v) => onChange(v[0])} />
-    </div>
-  );
-};
-
-
-const MotmPicker = ({
-  club, squad, player, comment, onPlayer, onComment,
-}: {
-  club: string;
-  squad: string[];
-  player: string;
-  comment: string;
-  onPlayer: (v: string) => void;
-  onComment: (v: string) => void;
-}) => {
-  const [query, setQuery] = useState("");
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return squad;
-    return squad.filter((p) => p.toLowerCase().includes(q));
-  }, [query, squad]);
-
-  return (
-    <div className="stat-card space-y-4">
-      <div className="flex items-center gap-2">
-        <Trophy className="h-5 w-5 text-primary" />
-        <div className="flex-1">
-          <p className="font-extrabold text-lg leading-tight">Man of the Match</p>
-          <p className="text-xs text-muted-foreground">
-            {club ? `Pick from the ${club} squad` : "Set your supported club to vote"}
-          </p>
-        </div>
-      </div>
-
-      {!squad.length ? (
-        <p className="text-sm text-muted-foreground italic">
-          No squad list available for this club yet.
-        </p>
-      ) : (
-        <>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search squad..."
-              className="h-11 bg-secondary border-0 pl-9"
-            />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto pr-1">
-            {filtered.map((name) => {
-              const active = player === name;
-              return (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => onPlayer(name)}
-                  className={cn(
-                    "rounded-xl px-3 py-2.5 text-sm font-bold text-left transition-all border",
-                    active
-                      ? "bg-gradient-primary text-primary-foreground border-transparent shadow-glow"
-                      : "bg-secondary/60 border-border hover:border-primary/40"
-                  )}
-                >
-                  {active && <Trophy className="inline h-3.5 w-3.5 mr-1.5 -mt-0.5" />}
-                  {name}
-                </button>
-              );
-            })}
-            {filtered.length === 0 && (
-              <p className="col-span-full text-xs text-muted-foreground py-2">
-                No players match "{query}".
-              </p>
-            )}
-          </div>
-        </>
-      )}
-
-      {player && (
-        <div className="space-y-2 pt-1">
-          <Label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
-            Your Shout (optional)
-          </Label>
-          <Input
-            value={comment}
-            onChange={(e) => onComment(e.target.value.slice(0, 140))}
-            placeholder="Carried the midfield today..."
-            className="h-11 bg-secondary border-0"
-          />
-        </div>
-      )}
     </div>
   );
 };

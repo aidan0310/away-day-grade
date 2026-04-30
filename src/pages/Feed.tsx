@@ -57,13 +57,7 @@ const Feed = () => {
             </Link>
           </div>
         ) : (
-          reviews.map((r) => (
-            <ReviewCard
-              key={r.id}
-              data={r}
-              onDeleted={(id) => setReviews((rs) => rs.filter((x) => x.id !== id))}
-            />
-          ))
+          reviews.map((r) => <ReviewCard key={r.id} data={r} />)
         )}
       </div>
     </AppShell>
