@@ -85,7 +85,10 @@ const LogMatch = () => {
       );
       return;
     }
-    const parsed = schema.safeParse({ opponent, stadium, match_date: date, note });
+    const parsed = schema.safeParse({
+      opponent, stadium, match_date: date, note,
+      motm_player: motmPlayer, motm_comment: motmComment,
+    });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -113,6 +116,8 @@ const LogMatch = () => {
         damage: ratings.damage,
         pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
         note: note.trim() || null,
+        motm_player: motmPlayer.trim(),
+        motm_comment: motmComment.trim() || null,
       });
       if (error) throw error;
       toast.success("Match logged. Up the lads.");
