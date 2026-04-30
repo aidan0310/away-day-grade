@@ -183,8 +183,18 @@ const LogMatch = () => {
     }
   };
 
+  if (loadingExisting) {
+    return (
+      <AppShell title="Edit Match">
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AppShell>
+    );
+  }
+
   return (
-    <AppShell title="Log Match">
+    <AppShell title={isEditing ? "Edit Match" : "Log Match"}>
       <div className="space-y-6">
         {/* Home / Away toggle */}
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-card p-1.5 border border-border">
@@ -290,7 +300,7 @@ const LogMatch = () => {
         </Field>
 
         <Button onClick={submit} disabled={saving} className="w-full h-14 text-base font-extrabold bg-gradient-primary text-primary-foreground shadow-glow">
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Scorecard"}
+          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : (isEditing ? "Update Review" : "Submit Scorecard")}
         </Button>
       </div>
     </AppShell>
