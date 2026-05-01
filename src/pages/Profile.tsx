@@ -7,6 +7,7 @@ import { ReviewCard, ReviewCardData } from "@/components/ReviewCard";
 import { LetterGrade } from "@/components/GradePill";
 import { Button } from "@/components/ui/button";
 import { LogOut, Loader2 } from "lucide-react";
+import { getRank, getNextRank } from "@/lib/ranks";
 
 const Profile = () => {
   const nav = useNavigate();
@@ -30,6 +31,9 @@ const Profile = () => {
   const overall = reviews.length
     ? reviews.reduce((s, r) => s + (r.atmosphere + r.view_rating + r.scran + r.damage) / 4, 0) / reviews.length
     : 0;
+
+  const rank = getRank(reviews.length);
+  const nextRank = getNextRank(reviews.length);
 
 const motmLeaderboard = Object.entries(
   reviews.reduce((acc, r) => {
@@ -58,7 +62,31 @@ const motmLeaderboard = Object.entries(
           <div className="flex-1 min-w-0">
             <p className="font-extrabold text-xl truncate">@{profile?.display_name}</p>
             <p className="text-sm text-muted-foreground">{profile?.supported_team ?? "No team yet"}</p>
+            <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
           </div>
+        </div>
+
+        {/* Rank card */}
+        <div className="stat-card space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">Terrace Rank</p>
+            <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
+          </div>
+          {nextRank ? (
+            <>
+              <div className="w-full bg-secondary rounded-full h-2">
+                <div
+                  className="bg-gradient-primary h-2 rounded-full transition-all"
+                  style={{ width: `${Math.min((reviews.length / nextRank.rank.minMatches) * 100, 100)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {nextRank.matchesNeeded} more {nextRank.matchesNeeded === 1 ? "match" : "matches"} to reach {nextRank.rank.label}
+              </p>
+            </>
+          ) : (
+            <p className="text-xs text-primary font-extrabold">Maximum rank achieved. Legend status. 🏆</p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3">

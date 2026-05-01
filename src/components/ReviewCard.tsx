@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getRank } from "@/lib/ranks";
 
 export type ReviewCardData = {
   id: string;
@@ -27,7 +28,7 @@ export type ReviewCardData = {
   motm_comment?: string | null;
   note: string | null;
   stadium: { id: string; name: string };
-  profile: { display_name: string; supported_team: string | null } | null;
+  profile: { display_name: string; supported_team: string | null; match_count?: number } | null;
 };
 
 const avg = (m: ReviewCardData) =>
@@ -63,13 +64,18 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
     <article className="stat-card space-y-4 transition-all hover:border-primary/40 hover:shadow-elevated">
       <header className="flex items-start justify-between gap-3">
         <div className="space-y-1.5 min-w-0 flex-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className={`rounded-md px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider ${data.is_away ? "bg-accent text-accent-foreground" : "bg-secondary text-foreground"}`}>
               {data.is_away ? "Away" : "Home"}
             </span>
             <span className="text-xs font-medium text-muted-foreground">
               {data.profile?.supported_team ?? "Fan"}
             </span>
+            {data.profile?.match_count !== undefined && (
+              <span className={`text-xs font-extrabold uppercase tracking-wider ${getRank(data.profile.match_count).color}`}>
+                {getRank(data.profile.match_count).label}
+              </span>
+            )}
           </div>
           <h3 className="text-xl font-extrabold leading-tight truncate">
             vs {data.opponent}
@@ -118,7 +124,13 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
       )}
 
       <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border">
-        <span className="font-semibold text-foreground/70">@{data.profile?.display_name ?? "fan"}</span>
+        <Link
+          to={`/user/${data.user_id}`}
+          className="font-semibold text-foreground/70 hover:text-primary transition-colors"
+          onClick={(e) => e.stopPropagation()}
+        >
+          @{data.profile?.display_name ?? "fan"}
+        </Link>
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1">
             <Calendar className="h-3 w-3" />

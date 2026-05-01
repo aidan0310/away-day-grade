@@ -12,6 +12,8 @@ import Stadiums from "./pages/Stadiums";
 import StadiumDetail from "./pages/StadiumDetail";
 import Leaderboards from "./pages/Leaderboards";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
+import Search from "./pages/Search";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 import { ClubTheme } from "@/components/ClubTheme";
@@ -54,7 +56,9 @@ const App = () => (
             <Route path="/stadium/:id" element={<Protected><StadiumDetail /></Protected>} />
             <Route path="/leaderboards" element={<Protected><Leaderboards /></Protected>} />
             <Route path="/profile" element={<Protected><Profile /></Protected>} />
-            <Route path="*" element={<NotFound />} />
+<Route path="/user/:id" element={<Protected><UserProfile /></Protected>} />
+<Route path="/search" element={<Protected><Search /></Protected>} />
+<Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
       </BrowserRouter>
