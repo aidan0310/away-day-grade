@@ -1,10 +1,20 @@
-import { Link } from "react-router-dom";
-import { Calendar, MapPin } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Calendar, MapPin, Pencil, Trash2, Loader2, Star } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import { useState } from "react";
 import { GradePill } from "./GradePill";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export type ReviewCardData = {
   id: string;
+  user_id: string;
   opponent: string;
   match_date: string;
   is_away: boolean;
@@ -13,6 +23,8 @@ export type ReviewCardData = {
   scran: number;
   damage: number;
   pint_price: number | null;
+  motm_player?: string | null;
+  motm_comment?: string | null;
   note: string | null;
   stadium: { id: string; name: string };
   profile: { display_name: string; supported_team: string | null } | null;
@@ -21,8 +33,32 @@ export type ReviewCardData = {
 const avg = (m: ReviewCardData) =>
   (m.atmosphere + m.view_rating + m.scran + m.damage) / 4;
 
-export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
+interface Props {
+  data: ReviewCardData;
+  onDeleted?: (id: string) => void;
+}
+
+export const ReviewCard = ({ data, onDeleted }: Props) => {
+  const { user } = useAuth();
+  const nav = useNavigate();
   const grade = avg(data);
+  const isOwner = user?.id === data.user_id;
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const { error } = await supabase.from("matches").delete().eq("id", data.id);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setConfirmOpen(false);
+    toast.success("Review removed.");
+    onDeleted?.(data.id);
+  };
+
   return (
     <article className="stat-card space-y-4 transition-all hover:border-primary/40 hover:shadow-elevated">
       <header className="flex items-start justify-between gap-3">
@@ -60,6 +96,21 @@ export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
         </div>
       )}
 
+      {data.motm_player && (
+        <div className="flex items-start gap-2 rounded-xl bg-secondary/40 px-3 py-2 border border-border/50">
+          <Star className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+          <div className="min-w-0">
+            <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              MOTM{data.profile?.supported_team ? ` · ${data.profile.supported_team}` : ""}
+            </p>
+            <p className="font-extrabold leading-tight truncate">{data.motm_player}</p>
+            {data.motm_comment && (
+              <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">"{data.motm_comment}"</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {data.note && (
         <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary pl-3">
           "{data.note}"
@@ -68,11 +119,55 @@ export const ReviewCard = ({ data }: { data: ReviewCardData }) => {
 
       <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border">
         <span className="font-semibold text-foreground/70">@{data.profile?.display_name ?? "fan"}</span>
-        <span className="flex items-center gap-1">
-          <Calendar className="h-3 w-3" />
-          {format(parseISO(data.match_date), "d MMM yyyy")}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            <Calendar className="h-3 w-3" />
+            {format(parseISO(data.match_date), "d MMM yyyy")}
+          </span>
+          {isOwner && (
+            <div className="flex items-center gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-muted-foreground hover:text-primary"
+                onClick={() => nav(`/log/${data.id}`)}
+                aria-label="Edit review"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                onClick={() => setConfirmOpen(true)}
+                aria-label="Delete review"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
       </footer>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove this match from your Passport and stats.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </article>
   );
 };
