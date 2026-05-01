@@ -75,7 +75,7 @@ const LogMatch = () => {
   // home or away. (Fans pick their own player, not the opposition's.)
   const ratedClub = normalizedSupportedTeam;
 
-// Guard: if no club is set, warn and redirect to profile
+
 
 
   // Load existing match for edit
