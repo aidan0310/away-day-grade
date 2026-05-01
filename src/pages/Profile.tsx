@@ -8,6 +8,8 @@ import { LetterGrade } from "@/components/GradePill";
 import { Button } from "@/components/ui/button";
 import { LogOut, Loader2 } from "lucide-react";
 import { getRank, getNextRank } from "@/lib/ranks";
+import { getSeason, getAllSeasons } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 const Profile = () => {
   const nav = useNavigate();
@@ -48,8 +50,14 @@ const Profile = () => {
   const nextRank = getNextRank(reviews.length);
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [selectedSeason, setSelectedSeason] = useState<string>("all");
 
-const motmLeaderboard = Object.entries(
+const seasons = getAllSeasons(reviews.map(r => r.match_date));
+  const filteredReviews = selectedSeason === "all"
+    ? reviews
+    : reviews.filter(r => getSeason(r.match_date) === selectedSeason);
+
+  const motmLeaderboard = Object.entries(
   reviews.reduce((acc, r) => {
     if (!r.motm_player) return acc;
     acc[r.motm_player] = (acc[r.motm_player] ?? 0) + 1;
@@ -156,12 +164,45 @@ const motmLeaderboard = Object.entries(
 
 <div className="space-y-3">
   <h2 className="font-display text-2xl tracking-wider">Your Match Diary</h2>
+  {seasons.length > 0 && (
+    <div className="-mx-1 overflow-x-auto">
+      <div className="flex gap-2 px-1 pb-1">
+        <button
+          onClick={() => setSelectedSeason("all")}
+          className={cn(
+            "shrink-0 rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-widest transition-all",
+            selectedSeason === "all"
+              ? "bg-gradient-primary text-primary-foreground shadow-glow"
+              : "bg-card text-muted-foreground border border-border"
+          )}
+        >
+          All
+        </button>
+        {seasons.map(s => (
+          <button
+            key={s}
+            onClick={() => setSelectedSeason(s)}
+            className={cn(
+              "shrink-0 rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-widest transition-all",
+              selectedSeason === s
+                ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                : "bg-card text-muted-foreground border border-border"
+            )}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
           ) : reviews.length === 0 ? (
             <p className="text-sm text-muted-foreground">No matches yet. Hit + to log one.</p>
+          ) : filteredReviews.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No matches for this season.</p>
           ) : (
-            reviews.map(r => (
+            filteredReviews.map(r => (
               <ReviewCard
                 key={r.id}
                 data={r}
