@@ -1,4 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 import { Calendar, MapPin, Pencil, Trash2, Loader2, Star } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
