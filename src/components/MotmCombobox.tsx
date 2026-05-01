@@ -106,7 +106,7 @@ export const MotmCombobox = ({ club, value, onChange }: Props) => {
           )}
         >
           <span className="truncate">
-            {value || (club ? `Pick MOTM for ${club}` : "Select opponent first")}
+            {value || (club ? `Pick your ${club} MOTM` : "Set your club in profile first")}
           </span>
           <ChevronDown className="h-4 w-4 opacity-60 shrink-0" />
         </button>
@@ -126,7 +126,7 @@ export const MotmCombobox = ({ club, value, onChange }: Props) => {
           />
           <CommandList className="max-h-[320px]">
             {trending.length > 0 && !trimmed && (
-              <CommandGroup heading={`Trending for ${club}`}>
+              <CommandGroup heading={`Trending ${club} players`}>
                 {trending.map((t) => (
                   <CommandItem key={`t-${t.player}`} value={t.player} onSelect={() => pick(t.player)}>
                     <Flame className="mr-2 h-4 w-4 text-primary" />

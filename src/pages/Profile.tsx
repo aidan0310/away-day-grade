@@ -71,7 +71,13 @@ const Profile = () => {
           ) : reviews.length === 0 ? (
             <p className="text-sm text-muted-foreground">No matches yet. Hit + to log one.</p>
           ) : (
-            reviews.map(r => <ReviewCard key={r.id} data={r} />)
+            reviews.map(r => (
+              <ReviewCard
+                key={r.id}
+                data={r}
+                onDeleted={(id) => setReviews(rs => rs.filter(x => x.id !== id))}
+              />
+            ))
           )}
         </div>
       </div>
