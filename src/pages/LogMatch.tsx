@@ -87,13 +87,22 @@ const LogMatch = () => {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (!motmPlayer.trim()) {
+      toast.error("Pick a Man of the Match.");
+      return;
+    }
     setSaving(true);
     try {
-      // upsert stadium by name
+      // upsert stadium by name (and tag the home team if known)
       const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
-        const { data: created, error: cErr } = await supabase.from("stadiums").insert({ name: stadium.trim() }).select("id").single();
+        const homeTeam = isAway ? opponent : normalizedSupportedTeam;
+        const { data: created, error: cErr } = await supabase
+          .from("stadiums")
+          .insert({ name: stadium.trim(), team: homeTeam || null })
+          .select("id")
+          .single();
         if (cErr) throw cErr;
         stadiumId = created.id;
       }
@@ -109,6 +118,8 @@ const LogMatch = () => {
         scran: ratings.scran,
         damage: ratings.damage,
         pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
+        motm_player: motmPlayer.trim(),
+        motm_comment: motmComment.trim() || null,
         note: note.trim() || null,
       });
       if (error) throw error;
