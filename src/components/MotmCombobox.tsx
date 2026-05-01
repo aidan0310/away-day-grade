@@ -32,6 +32,7 @@ export const MotmCombobox = ({ club, value, onChange }: Props) => {
   const debounceRef = useRef<number | null>(null);
 
   useEffect(() => { setQuery(value); }, [value]);
+useEffect(() => { setQuery(""); }, [club]);
 
   // Load trending whenever club changes / popover opens
   useEffect(() => {

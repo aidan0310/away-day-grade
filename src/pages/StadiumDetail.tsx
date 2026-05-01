@@ -37,7 +37,7 @@ const StadiumDetail = () => {
     damage: avg(reviews.map(r => r.damage)),
   } : null;
   const overall = avgs ? (avgs.atmosphere + avgs.view + avgs.scran + avgs.damage) / 4 : 0;
-  const pintPrices = reviews.map(r => r.pint_price).filter((p): p is number => p != null).map(Number);
+  const pintPrices = reviews.map(r => r.pint_price).filter((p): p is number => p != null).map(Number).filter(n => !isNaN(n));
   const avgPint = pintPrices.length ? pintPrices.reduce((a, b) => a + b, 0) / pintPrices.length : null;
 
   return (

@@ -75,6 +75,12 @@ const LogMatch = () => {
   // home or away. (Fans pick their own player, not the opposition's.)
   const ratedClub = normalizedSupportedTeam;
 
+// Guard: if no club is set, warn and redirect to profile
+if (!ratedClub && !loadingExisting) {
+  toast.error("Set your Premier League club in your profile before logging a match.");
+  nav("/profile");
+}
+
   // Load existing match for edit
   useEffect(() => {
     if (!isEdit || !user || !editId) return;
@@ -110,7 +116,12 @@ const LogMatch = () => {
       setLoadingExisting(false);
     })();
   }, [isEdit, editId, user, nav]);
-
+useEffect(() => {
+  if (!loadingExisting && !normalizedSupportedTeam) {
+    toast.error("Set your club in your profile before logging a match.");
+    nav("/profile");
+  }
+}, [loadingExisting, normalizedSupportedTeam, nav]);
   const submit = async () => {
     if (!user) return;
     if (!stadium) {

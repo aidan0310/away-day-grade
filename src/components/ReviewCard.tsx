@@ -92,7 +92,7 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
       {data.pint_price != null && (
         <div className="flex items-center justify-between rounded-xl bg-secondary/40 px-3 py-2 border border-border/50">
           <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pint Price</span>
-          <span className="font-display text-xl tracking-wider text-primary">£{Number(data.pint_price).toFixed(2)}</span>
+          <span className="font-display text-xl tracking-wider text-primary">£{parseFloat(String(data.pint_price)).toFixed(2)}</span>
         </div>
       )}
 
