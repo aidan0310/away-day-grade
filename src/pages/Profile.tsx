@@ -77,9 +77,9 @@ const motmLeaderboard = Object.entries(
             <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
             <button
               onClick={() => nav("/profile/followers")}
-              className="text-xs text-muted-foreground mt-0.5 hover:text-primary transition-colors text-left block"
+              className="mt-1 rounded-lg border border-border px-2.5 py-1 text-xs font-extrabold hover:border-primary hover:text-primary transition-colors text-left"
             >
-              <span className="font-extrabold text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
+              <span className="text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
             </button>
           </div>
         </div>
