@@ -61,10 +61,16 @@ const LogMatch = () => {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
+  const [motmPlayer, setMotmPlayer] = useState("");
+  const [motmComment, setMotmComment] = useState("");
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
   const [saving, setSaving] = useState(false);
+
+  // The club whose player is being voted MOTM:
+  // away match → the opponent (home team); home match → user's supported club.
+  const ratedClub = isAway ? opponent : normalizedSupportedTeam;
 
   const submit = async () => {
     if (!user) return;
