@@ -31,11 +31,12 @@ const Profile = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { count } = await supabase
-        .from("follows")
-        .select("id", { count: "exact", head: true })
-        .eq("following_id", user.id);
-      setFollowerCount(count ?? 0);
+      const [{ count: followers }, { count: following }] = await Promise.all([
+        supabase.from("follows").select("id", { count: "exact", head: true }).eq("following_id", user.id),
+        supabase.from("follows").select("id", { count: "exact", head: true }).eq("follower_id", user.id),
+      ]);
+      setFollowerCount(followers ?? 0);
+      setFollowingCount(following ?? 0);
     })();
   }, [user]);
 
@@ -46,6 +47,7 @@ const Profile = () => {
   const rank = getRank(reviews.length);
   const nextRank = getNextRank(reviews.length);
   const [followerCount, setFollowerCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
 
 const motmLeaderboard = Object.entries(
   reviews.reduce((acc, r) => {
@@ -76,12 +78,20 @@ const motmLeaderboard = Object.entries(
             <p className="text-sm text-muted-foreground">{profile?.supported_team ?? "No team yet"}</p>
             <div className="flex flex-col items-start gap-1.5 mt-1">
               <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
-              <button
-                onClick={() => nav("/profile/followers")}
-                className="rounded-lg border border-border px-2.5 py-1 text-xs font-extrabold hover:border-primary hover:text-primary transition-colors text-left"
-              >
-                <span className="text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => nav("/profile/followers")}
+                  className="rounded-lg border border-border px-2.5 py-1 text-xs font-extrabold hover:border-primary hover:text-primary transition-colors text-left"
+                >
+                  <span className="text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
+                </button>
+                <button
+                  onClick={() => nav("/profile/following")}
+                  className="rounded-lg border border-border px-2.5 py-1 text-xs font-extrabold hover:border-primary hover:text-primary transition-colors text-left"
+                >
+                  <span className="text-foreground">{followingCount}</span> following
+                </button>
+              </div>
             </div>
           </div>
         </div>
