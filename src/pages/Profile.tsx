@@ -28,12 +28,24 @@ const Profile = () => {
     })();
   }, [user, profile]);
 
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { count } = await supabase
+        .from("follows")
+        .select("id", { count: "exact", head: true })
+        .eq("following_id", user.id);
+      setFollowerCount(count ?? 0);
+    })();
+  }, [user]);
+
   const overall = reviews.length
     ? reviews.reduce((s, r) => s + (r.atmosphere + r.view_rating + r.scran + r.damage) / 4, 0) / reviews.length
     : 0;
 
   const rank = getRank(reviews.length);
   const nextRank = getNextRank(reviews.length);
+  const [followerCount, setFollowerCount] = useState(0);
 
 const motmLeaderboard = Object.entries(
   reviews.reduce((acc, r) => {
@@ -63,6 +75,9 @@ const motmLeaderboard = Object.entries(
             <p className="font-extrabold text-xl truncate">@{profile?.display_name}</p>
             <p className="text-sm text-muted-foreground">{profile?.supported_team ?? "No team yet"}</p>
             <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              <span className="font-extrabold text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
+            </p>
           </div>
         </div>
 

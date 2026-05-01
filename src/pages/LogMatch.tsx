@@ -63,6 +63,8 @@ const LogMatch = () => {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
+  const [homeScore, setHomeScore] = useState<string>("");
+  const [awayScore, setAwayScore] = useState<string>("");
   const [motmPlayer, setMotmPlayer] = useState("");
   const [motmComment, setMotmComment] = useState("");
   const [ratings, setRatings] = useState<Record<string, number>>({
@@ -99,6 +101,8 @@ const LogMatch = () => {
       setDate(data.match_date);
       setNote(data.note ?? "");
       setPintPrice(data.pint_price != null ? String(data.pint_price) : "");
+      setHomeScore(data.home_score != null ? String(data.home_score) : "");
+      setAwayScore(data.away_score != null ? String(data.away_score) : "");
       setMotmPlayer(data.motm_player ?? "");
       setMotmComment(data.motm_comment ?? "");
       setRatings({
@@ -156,6 +160,8 @@ const LogMatch = () => {
         scran: ratings.scran,
         damage: ratings.damage,
         pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
+        home_score: homeScore !== "" ? parseInt(homeScore) : null,
+        away_score: awayScore !== "" ? parseInt(awayScore) : null,
         motm_player: motmPlayer.trim(),
         motm_comment: motmComment.trim() || null,
         note: note.trim() || null,
@@ -264,6 +270,31 @@ const LogMatch = () => {
             />
           ))}
         </div>
+
+        <Field label="Match Result (optional)">
+          <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+            <Input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={homeScore}
+              onChange={(e) => setHomeScore(e.target.value)}
+              placeholder="0"
+              className="h-12 bg-secondary border-0 text-center font-extrabold text-lg"
+            />
+            <span className="font-display text-2xl tracking-wider text-muted-foreground">-</span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min="0"
+              value={awayScore}
+              onChange={(e) => setAwayScore(e.target.value)}
+              placeholder="0"
+              className="h-12 bg-secondary border-0 text-center font-extrabold text-lg"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">Home score on the left, away on the right.</p>
+        </Field>
 
         <Field label="Price of a pint (optional)">
           <div className="relative">

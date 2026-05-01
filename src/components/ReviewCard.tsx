@@ -24,6 +24,8 @@ export type ReviewCardData = {
   scran: number;
   damage: number;
   pint_price: number | null;
+  home_score: number | null;
+  away_score: number | null;
   motm_player?: string | null;
   motm_comment?: string | null;
   note: string | null;
@@ -87,6 +89,20 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
         </div>
         <GradePill value={grade} size="md" />
       </header>
+
+      {data.home_score != null && data.away_score != null && (() => {
+        const userIsHome = !data.is_away;
+        const userScore = userIsHome ? data.home_score : data.away_score;
+        const oppScore = userIsHome ? data.away_score : data.home_score;
+        const result = userScore > oppScore ? "W" : userScore < oppScore ? "L" : "D";
+        const color = result === "W" ? "text-rating-good" : result === "L" ? "text-rating-bad" : "text-rating-mid";
+        return (
+          <div className="flex items-center gap-1.5 rounded-xl bg-secondary/60 px-3 py-1.5 border border-border/50 w-fit">
+            <span className={cn("font-extrabold text-sm uppercase", color)}>{result}</span>
+            <span className="font-display text-lg tracking-wider">{data.home_score}–{data.away_score}</span>
+          </div>
+        );
+      })()}
 
       <div className="grid grid-cols-4 gap-2">
         <Stat label={data.is_away ? "Atmos" : "Home Atmos"} value={data.atmosphere} />
