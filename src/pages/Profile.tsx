@@ -58,7 +58,7 @@ const seasons = getAllSeasons(reviews.map(r => r.match_date));
     : reviews.filter(r => getSeason(r.match_date) === selectedSeason);
 
   const motmLeaderboard = Object.entries(
-  reviews.reduce((acc, r) => {
+  filteredReviews.reduce((acc, r) => {
     if (!r.motm_player) return acc;
     acc[r.motm_player] = (acc[r.motm_player] ?? 0) + 1;
     return acc;
