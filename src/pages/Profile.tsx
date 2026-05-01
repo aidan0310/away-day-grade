@@ -51,14 +51,19 @@ const Profile = () => {
   const [followerCount, setFollowerCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [selectedSeason, setSelectedSeason] = useState<string>("all");
+  const [selectedMotmSeason, setSelectedMotmSeason] = useState<string>("all");
 
 const seasons = getAllSeasons(reviews.map(r => r.match_date));
   const filteredReviews = selectedSeason === "all"
     ? reviews
     : reviews.filter(r => getSeason(r.match_date) === selectedSeason);
 
+  const filteredMotmReviews = selectedMotmSeason === "all"
+    ? reviews
+    : reviews.filter(r => getSeason(r.match_date) === selectedMotmSeason);
+
   const motmLeaderboard = Object.entries(
-  filteredReviews.reduce((acc, r) => {
+  filteredMotmReviews.reduce((acc, r) => {
     if (!r.motm_player) return acc;
     acc[r.motm_player] = (acc[r.motm_player] ?? 0) + 1;
     return acc;
@@ -146,6 +151,37 @@ const seasons = getAllSeasons(reviews.map(r => r.match_date));
         {motmLeaderboard.length > 0 && (
   <div className="space-y-3">
     <h2 className="font-display text-2xl tracking-wider">Your MOTM Picks</h2>
+    {seasons.length > 0 && (
+      <div className="-mx-1 overflow-x-auto">
+        <div className="flex gap-2 px-1 pb-1">
+          <button
+            onClick={() => setSelectedMotmSeason("all")}
+            className={cn(
+              "shrink-0 rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-widest transition-all",
+              selectedMotmSeason === "all"
+                ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                : "bg-card text-muted-foreground border border-border"
+            )}
+          >
+            All
+          </button>
+          {seasons.map(s => (
+            <button
+              key={s}
+              onClick={() => setSelectedMotmSeason(s)}
+              className={cn(
+                "shrink-0 rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-widest transition-all",
+                selectedMotmSeason === s
+                  ? "bg-gradient-primary text-primary-foreground shadow-glow"
+                  : "bg-card text-muted-foreground border border-border"
+              )}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
     <div className="rounded-2xl overflow-hidden border border-border bg-card">
       <div className="grid grid-cols-[2rem_1fr_3rem] gap-3 px-4 py-3 bg-secondary/60 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
         <span>#</span>
