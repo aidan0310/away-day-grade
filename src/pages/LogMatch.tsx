@@ -224,6 +224,16 @@ const LogMatch = () => {
           <p className="text-xs text-muted-foreground">Helps fans see the average pint price at this ground.</p>
         </Field>
 
+        <Field label={`Man of the Match${ratedClub ? ` (${ratedClub})` : ""}`}>
+          <MotmCombobox club={ratedClub} value={motmPlayer} onChange={setMotmPlayer} />
+          <Textarea
+            value={motmComment}
+            onChange={(e) => setMotmComment(e.target.value.slice(0, 280))}
+            placeholder="Why? (optional)"
+            className="bg-card border-border min-h-[64px]"
+          />
+        </Field>
+
         <Field label="Notes (optional)">
           <Textarea value={note} onChange={(e) => setNote(e.target.value.slice(0, 500))} placeholder="Best pie I've had in years..." className="bg-card border-border min-h-[88px]" />
         </Field>
