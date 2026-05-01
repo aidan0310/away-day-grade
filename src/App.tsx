@@ -16,6 +16,7 @@ import UserProfile from "./pages/UserProfile";
 import Search from "./pages/Search";
 import Followers from "./pages/Followers";
 import Following from "./pages/Following";
+import EditProfile from "./pages/EditProfile";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 import { ClubTheme } from "@/components/ClubTheme";
@@ -62,6 +63,7 @@ const App = () => (
 <Route path="/search" element={<Protected><Search /></Protected>} />
 <Route path="/profile/followers" element={<Protected><Followers /></Protected>} />
 <Route path="/profile/following" element={<Protected><Following /></Protected>} />
+<Route path="/profile/edit" element={<Protected><EditProfile /></Protected>} />
 <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
