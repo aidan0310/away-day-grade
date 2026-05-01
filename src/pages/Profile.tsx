@@ -74,13 +74,15 @@ const motmLeaderboard = Object.entries(
           <div className="flex-1 min-w-0">
             <p className="font-extrabold text-xl truncate">@{profile?.display_name}</p>
             <p className="text-sm text-muted-foreground">{profile?.supported_team ?? "No team yet"}</p>
-            <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
-            <button
-              onClick={() => nav("/profile/followers")}
-              className="mt-1 rounded-lg border border-border px-2.5 py-1 text-xs font-extrabold hover:border-primary hover:text-primary transition-colors text-left"
-            >
-              <span className="text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
-            </button>
+            <div className="flex flex-col items-start gap-1.5 mt-1">
+              <span className={`text-sm font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</span>
+              <button
+                onClick={() => nav("/profile/followers")}
+                className="rounded-lg border border-border px-2.5 py-1 text-xs font-extrabold hover:border-primary hover:text-primary transition-colors text-left"
+              >
+                <span className="text-foreground">{followerCount}</span> {followerCount === 1 ? "follower" : "followers"}
+              </button>
+            </div>
           </div>
         </div>
 
