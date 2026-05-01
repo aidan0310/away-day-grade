@@ -75,9 +75,6 @@ const LogMatch = () => {
   // home or away. (Fans pick their own player, not the opposition's.)
   const ratedClub = normalizedSupportedTeam;
 
-
-
-
   // Load existing match for edit
   useEffect(() => {
     if (!isEdit || !user || !editId) return;
