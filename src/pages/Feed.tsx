@@ -14,8 +14,6 @@ const Feed = () => {
   const [lastRefresh, setLastRefresh] = useState(0);
 
   useEffect(() => {
-
-  useEffect(() => {
     (async () => {
       const { data: matches } = await supabase
         .from("matches")
@@ -44,12 +42,12 @@ const Feed = () => {
           <p className="text-xs font-extrabold uppercase tracking-widest opacity-80">Welcome back</p>
           <p className="text-2xl font-extrabold mt-1">{profile?.supported_team ? `Up the ${profile.supported_team}` : "Pick your team"}</p>
           <p className="text-sm opacity-90 mt-1">Latest reviews from the away end.</p>
-<button
-  onClick={() => { setLoading(true); setLastRefresh(Date.now()); }}
-  className="mt-2 text-xs font-extrabold uppercase tracking-widest opacity-70 hover:opacity-100 transition-opacity"
->
-  ↻ Refresh
-</button>
+          <button
+            onClick={() => { setLoading(true); setLastRefresh(Date.now()); }}
+            className="mt-2 text-xs font-extrabold uppercase tracking-widest opacity-70 hover:opacity-100 transition-opacity"
+          >
+            ↻ Refresh
+          </button>
         </div>
 
         {loading ? (
