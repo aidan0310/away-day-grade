@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      global_players: {
+        Row: {
+          club: string
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          name_normalized: string
+        }
+        Insert: {
+          club: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          name_normalized: string
+        }
+        Update: {
+          club?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          name_normalized?: string
+        }
+        Relationships: []
+      }
       matches: {
         Row: {
           atmosphere: number
@@ -126,7 +153,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      trending_motm: {
+        Args: { _club: string; _limit?: number }
+        Returns: {
+          player: string
+          votes: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
