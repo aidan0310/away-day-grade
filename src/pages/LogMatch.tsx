@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
+import { MotmCombobox } from "@/components/MotmCombobox";
 
 // Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
 // different meanings depending on whether the user attended as a Home or Away fan.
@@ -60,10 +61,16 @@ const LogMatch = () => {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
+  const [motmPlayer, setMotmPlayer] = useState("");
+  const [motmComment, setMotmComment] = useState("");
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
   const [saving, setSaving] = useState(false);
+
+  // The club whose player is being voted MOTM:
+  // away match → the opponent (home team); home match → user's supported club.
+  const ratedClub = isAway ? opponent : normalizedSupportedTeam;
 
   const submit = async () => {
     if (!user) return;
@@ -80,13 +87,22 @@ const LogMatch = () => {
       toast.error(parsed.error.issues[0].message);
       return;
     }
+    if (!motmPlayer.trim()) {
+      toast.error("Pick a Man of the Match.");
+      return;
+    }
     setSaving(true);
     try {
-      // upsert stadium by name
+      // upsert stadium by name (and tag the home team if known)
       const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
-        const { data: created, error: cErr } = await supabase.from("stadiums").insert({ name: stadium.trim() }).select("id").single();
+        const homeTeam = isAway ? opponent : normalizedSupportedTeam;
+        const { data: created, error: cErr } = await supabase
+          .from("stadiums")
+          .insert({ name: stadium.trim(), team: homeTeam || null })
+          .select("id")
+          .single();
         if (cErr) throw cErr;
         stadiumId = created.id;
       }
@@ -102,6 +118,8 @@ const LogMatch = () => {
         scran: ratings.scran,
         damage: ratings.damage,
         pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
+        motm_player: motmPlayer.trim(),
+        motm_comment: motmComment.trim() || null,
         note: note.trim() || null,
       });
       if (error) throw error;
@@ -204,6 +222,16 @@ const LogMatch = () => {
             />
           </div>
           <p className="text-xs text-muted-foreground">Helps fans see the average pint price at this ground.</p>
+        </Field>
+
+        <Field label={`Man of the Match${ratedClub ? ` (${ratedClub})` : ""}`}>
+          <MotmCombobox club={ratedClub} value={motmPlayer} onChange={setMotmPlayer} />
+          <Textarea
+            value={motmComment}
+            onChange={(e) => setMotmComment(e.target.value.slice(0, 280))}
+            placeholder="Why? (optional)"
+            className="bg-card border-border min-h-[64px]"
+          />
         </Field>
 
         <Field label="Notes (optional)">
