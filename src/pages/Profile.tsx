@@ -31,6 +31,16 @@ const Profile = () => {
     ? reviews.reduce((s, r) => s + (r.atmosphere + r.view_rating + r.scran + r.damage) / 4, 0) / reviews.length
     : 0;
 
+const motmLeaderboard = Object.entries(
+  reviews.reduce((acc, r) => {
+    if (!r.motm_player) return acc;
+    acc[r.motm_player] = (acc[r.motm_player] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>)
+)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 5);
+
   const onSignOut = async () => {
     await signOut();
     nav("/auth");
@@ -64,8 +74,30 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="space-y-3">
-          <h2 className="font-display text-2xl tracking-wider">Your Match Diary</h2>
+        {motmLeaderboard.length > 0 && (
+  <div className="space-y-3">
+    <h2 className="font-display text-2xl tracking-wider">Your MOTM Picks</h2>
+    <div className="rounded-2xl overflow-hidden border border-border bg-card">
+      <div className="grid grid-cols-[2rem_1fr_3rem] gap-3 px-4 py-3 bg-secondary/60 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+        <span>#</span>
+        <span>Player</span>
+        <span className="text-right">Times</span>
+      </div>
+      {motmLeaderboard.map(([player, count], i) => (
+        <div key={player} className="grid grid-cols-[2rem_1fr_3rem] gap-3 px-4 py-3 items-center border-t border-border/60">
+          <span className={`font-display text-xl tracking-wider ${i < 3 ? "text-primary" : "text-muted-foreground"}`}>
+            {i + 1}
+          </span>
+          <span className="font-extrabold truncate">{player}</span>
+          <span className="text-right font-display text-xl tracking-wider text-primary">{count}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
+
+<div className="space-y-3">
+  <h2 className="font-display text-2xl tracking-wider">Your Match Diary</h2>
           {loading ? (
             <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
           ) : reviews.length === 0 ? (
