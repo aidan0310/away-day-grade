@@ -111,11 +111,11 @@ const LogMatch = () => {
     })();
   }, [isEdit, editId, user, nav]);
 useEffect(() => {
-  if (!loadingExisting && !normalizedSupportedTeam) {
+  if (!loadingExisting && profile !== undefined && !normalizedSupportedTeam) {
     toast.error("Set your club in your profile before logging a match.");
     nav("/profile");
   }
-}, [loadingExisting, normalizedSupportedTeam, nav]);
+}, [loadingExisting, normalizedSupportedTeam, nav, profile]);
   const submit = async () => {
     if (!user) return;
     if (!stadium) {
