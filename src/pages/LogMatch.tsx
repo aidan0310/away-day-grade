@@ -76,10 +76,7 @@ const LogMatch = () => {
   const ratedClub = normalizedSupportedTeam;
 
 // Guard: if no club is set, warn and redirect to profile
-if (!ratedClub && !loadingExisting) {
-  toast.error("Set your Premier League club in your profile before logging a match.");
-  nav("/profile");
-}
+
 
   // Load existing match for edit
   useEffect(() => {
