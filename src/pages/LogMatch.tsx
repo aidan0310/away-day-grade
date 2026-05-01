@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { z } from "zod";
 import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,6 +42,8 @@ const schema = z.object({
 
 const LogMatch = () => {
   const nav = useNavigate();
+  const { id: editId } = useParams<{ id: string }>();
+  const isEdit = Boolean(editId);
   const { user, profile } = useAuth();
   const [isAway, setIsAway] = useState(true);
   const [opponent, setOpponent] = useState("");
@@ -67,10 +69,47 @@ const LogMatch = () => {
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
   const [saving, setSaving] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(isEdit);
 
-  // The club whose player is being voted MOTM:
-  // away match → the opponent (home team); home match → user's supported club.
-  const ratedClub = isAway ? opponent : normalizedSupportedTeam;
+  // MOTM is ALWAYS picked from the user's own supported club, regardless of
+  // home or away. (Fans pick their own player, not the opposition's.)
+  const ratedClub = normalizedSupportedTeam;
+
+  // Load existing match for edit
+  useEffect(() => {
+    if (!isEdit || !user || !editId) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from("matches")
+        .select("*")
+        .eq("id", editId)
+        .maybeSingle();
+      if (error || !data) {
+        toast.error("Could not load match");
+        nav("/profile");
+        return;
+      }
+      if (data.user_id !== user.id) {
+        toast.error("You can only edit your own reviews");
+        nav("/profile");
+        return;
+      }
+      setIsAway(data.is_away);
+      setOpponent(data.opponent);
+      setDate(data.match_date);
+      setNote(data.note ?? "");
+      setPintPrice(data.pint_price != null ? String(data.pint_price) : "");
+      setMotmPlayer(data.motm_player ?? "");
+      setMotmComment(data.motm_comment ?? "");
+      setRatings({
+        atmosphere: data.atmosphere,
+        view_rating: data.view_rating,
+        scran: data.scran,
+        damage: data.damage,
+      });
+      setLoadingExisting(false);
+    })();
+  }, [isEdit, editId, user, nav]);
 
   const submit = async () => {
     if (!user) return;
@@ -88,7 +127,7 @@ const LogMatch = () => {
       return;
     }
     if (!motmPlayer.trim()) {
-      toast.error("Pick a Man of the Match.");
+      toast.error(`Pick your ${supportedTeam || "team's"} Man of the Match.`);
       return;
     }
     setSaving(true);
@@ -107,8 +146,7 @@ const LogMatch = () => {
         stadiumId = created.id;
       }
 
-      const { error } = await supabase.from("matches").insert({
-        user_id: user.id,
+      const payload = {
         stadium_id: stadiumId,
         opponent: opponent.trim(),
         match_date: date,
@@ -121,10 +159,22 @@ const LogMatch = () => {
         motm_player: motmPlayer.trim(),
         motm_comment: motmComment.trim() || null,
         note: note.trim() || null,
-      });
-      if (error) throw error;
-      toast.success("Match logged. Up the lads.");
-      nav("/");
+      };
+
+      if (isEdit && editId) {
+        const { error } = await supabase
+          .from("matches")
+          .update(payload)
+          .eq("id", editId)
+          .eq("user_id", user.id);
+        if (error) throw error;
+        toast.success("Review updated.");
+      } else {
+        const { error } = await supabase.from("matches").insert({ ...payload, user_id: user.id });
+        if (error) throw error;
+        toast.success("Match logged. Up the lads.");
+      }
+      nav(isEdit ? "/profile" : "/");
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : "Could not save");
     } finally {
@@ -132,8 +182,16 @@ const LogMatch = () => {
     }
   };
 
+  if (loadingExisting) {
+    return (
+      <AppShell title="Edit Match">
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+      </AppShell>
+    );
+  }
+
   return (
-    <AppShell title="Log Match">
+    <AppShell title={isEdit ? "Edit Match" : "Log Match"}>
       <div className="space-y-6">
         {/* Home / Away toggle */}
         <div className="grid grid-cols-2 gap-2 rounded-2xl bg-card p-1.5 border border-border">
@@ -224,7 +282,8 @@ const LogMatch = () => {
           <p className="text-xs text-muted-foreground">Helps fans see the average pint price at this ground.</p>
         </Field>
 
-        <Field label={`Man of the Match${ratedClub ? ` (${ratedClub})` : ""}`}>
+        <Field label={`Your Man of the Match${ratedClub ? ` (${ratedClub})` : ""}`}>
+          <p className="text-xs text-muted-foreground -mt-1">Pick the standout player from your side.</p>
           <MotmCombobox club={ratedClub} value={motmPlayer} onChange={setMotmPlayer} />
           <Textarea
             value={motmComment}
@@ -239,7 +298,7 @@ const LogMatch = () => {
         </Field>
 
         <Button onClick={submit} disabled={saving} className="w-full h-14 text-base font-extrabold bg-gradient-primary text-primary-foreground shadow-glow">
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Scorecard"}
+          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : (isEdit ? "Update Review" : "Submit Scorecard")}
         </Button>
       </div>
     </AppShell>
