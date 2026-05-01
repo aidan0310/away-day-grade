@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
+import { MotmCombobox } from "@/components/MotmCombobox";
 
 // Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
 // different meanings depending on whether the user attended as a Home or Away fan.
