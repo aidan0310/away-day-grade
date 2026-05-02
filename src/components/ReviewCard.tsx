@@ -139,7 +139,7 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
         <Stat label={data.is_away ? "Atmos" : "Home Atmos"} value={data.atmosphere} />
         <Stat label={data.is_away ? "View" : "Away Fans"} value={data.view_rating} />
         <Stat label={data.is_away ? "Scran" : "Team"} value={data.scran} />
-        <Stat label={data.is_away ? "Damage" : "Logistics"} value={data.damage} />
+        <Stat label={data.is_away ? "Team" : "Logistics"} value={data.damage} />
       </div>
 
       {data.pint_price != null && (

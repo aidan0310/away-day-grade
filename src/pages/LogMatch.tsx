@@ -27,7 +27,7 @@ const AWAY_RATINGS = [
   { key: "atmosphere", label: "Atmosphere", desc: "Home (opposition) fans' noise & buzz" },
   { key: "view_rating", label: "The View", desc: "Pitch visibility from away end" },
   { key: "scran", label: "Scran & Pints", desc: "Food & drink quality" },
-  { key: "damage", label: "The Damage", desc: "Value for money (1–10)" },
+  { key: "damage", label: "Team Performance", desc: "How did your side play?" },
 ] as const;
 
 const HOME_RATINGS = [
