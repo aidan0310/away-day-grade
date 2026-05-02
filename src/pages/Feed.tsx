@@ -45,6 +45,19 @@ const Feed = () => {
     })();
   }, [user]);
 
+  // Fetch unread notification count
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnreadCount(count ?? 0);
+    })();
+  }, [user]);
+
   // Fetch all reviews
   useEffect(() => {
     (async () => {
@@ -63,7 +76,6 @@ const Feed = () => {
         .select("id, display_name, supported_team")
         .in("id", userIds);
 
-      // Get match counts for ranks
       const { data: matchCounts } = await supabase
         .from("matches")
         .select("user_id")
@@ -143,7 +155,6 @@ const Feed = () => {
           </button>
         </div>
 
-        {/* Tabs */}
         <div className="flex gap-2">
           {(["all", "following"] as FeedTab[]).map((t) => (
             <button
