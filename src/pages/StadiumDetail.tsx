@@ -27,7 +27,7 @@ const StadiumDetail = () => {
         .eq("stadium_id", id)
         .order("created_at", { ascending: false });
       const userIds = [...new Set((matches ?? []).map((m: any) => m.user_id))];
-      const { data: profiles } = await supabase.from("profiles").select("id, display_name, supported_team").in("id", userIds);
+      const { data: profiles } = await supabase.from("profiles").select("id, display_name, supported_team, avatar_url").in("id", userIds);
       const pmap = new Map((profiles ?? []).map(p => [p.id, p]));
       setReviews((matches ?? []).map((m: any) => ({ ...m, profile: pmap.get(m.user_id) ?? null })));
       setLoading(false);

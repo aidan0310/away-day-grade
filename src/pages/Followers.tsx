@@ -38,7 +38,7 @@ const Followers = () => {
 
       const { data: profiles } = await supabase
         .from("profiles")
-        .select("id, display_name, supported_team")
+        .select("id, display_name, supported_team, avatar_url")
         .in("id", ids);
 
       const { data: matches } = await supabase

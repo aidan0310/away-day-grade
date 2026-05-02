@@ -33,11 +33,11 @@ const Search = () => {
     }
     setLoading(true);
     const { data: profiles } = await supabase
-      .from("profiles")
-      .select("id, display_name, supported_team")
-      .ilike("display_name", `%${val.trim()}%`)
-      .neq("id", user?.id ?? "")
-      .limit(20);
+        .from("profiles")
+        .select("id, display_name, supported_team, avatar_url")
+        .ilike("display_name", `%${val.trim()}%`)
+        .neq("id", user?.id ?? "")
+        .limit(20);
 
     if (!profiles) { setLoading(false); setSearched(true); return; }
 

@@ -32,7 +32,7 @@ const UserProfile = () => {
     (async () => {
       const { data: p } = await supabase
         .from("profiles")
-        .select("id, display_name, supported_team")
+        .select("id, display_name, supported_team, avatar_url")
         .eq("id", id)
         .maybeSingle();
       setProfile(p);
