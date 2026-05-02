@@ -14,6 +14,11 @@ export const ClubTheme = () => {
       "--sidebar-primary", "--sidebar-primary-foreground", "--sidebar-ring",
       "--accent", "--accent-foreground", "--border", "--sidebar-border",
       "--gradient-primary", "--shadow-glow",
+      "--background", "--foreground",
+      "--card", "--card-foreground",
+      "--muted", "--muted-foreground",
+      "--secondary", "--secondary-foreground",
+      "--popover", "--popover-foreground",
     ];
 
     const plClub = teamName ? clubForName(teamName) : undefined;
@@ -25,7 +30,6 @@ export const ClubTheme = () => {
       return;
     }
 
-    // Pick a usable primary — avoid pure black/white
     const isUsable = (hex: string) => {
       const h = hex.replace("#", "");
       const r = parseInt(h.slice(0, 2), 16);
@@ -53,8 +57,38 @@ export const ClubTheme = () => {
     const primaryHsl = hexToHslString(effectivePrimary);
     const secondaryHsl = hexToHslString(effectiveSecondary);
     const primaryFg = readableForegroundHsl(effectivePrimary);
-    const secondaryFg = readableForegroundHsl(effectiveSecondary);
 
+    // Work out if the club is "dark" or "light" based on primary lightness
+    const primaryL = parseInt(primaryHsl.split(" ")[2]);
+    const isDark = primaryL < 50;
+
+    // Background is a very dark/light shade of the primary hue
+    const [hue, sat] = primaryHsl.split(" ");
+    const bgL = isDark ? "8%" : "92%";
+    const cardL = isDark ? "13%" : "87%";
+    const mutedL = isDark ? "18%" : "82%";
+    const fgL = isDark ? "95%" : "8%";
+    const mutedFgL = isDark ? "65%" : "35%";
+
+    const bgHsl = `${hue} ${sat} ${bgL}`;
+    const cardHsl = `${hue} ${sat} ${cardL}`;
+    const mutedHsl = `${hue} ${sat} ${mutedL}`;
+    const fgHsl = `${hue} 5% ${fgL}`;
+    const mutedFgHsl = `${hue} 10% ${mutedFgL}`;
+
+    // Core colours
+    root.style.setProperty("--background", bgHsl);
+    root.style.setProperty("--foreground", fgHsl);
+    root.style.setProperty("--card", cardHsl);
+    root.style.setProperty("--card-foreground", fgHsl);
+    root.style.setProperty("--muted", mutedHsl);
+    root.style.setProperty("--muted-foreground", mutedFgHsl);
+    root.style.setProperty("--secondary", mutedHsl);
+    root.style.setProperty("--secondary-foreground", fgHsl);
+    root.style.setProperty("--popover", cardHsl);
+    root.style.setProperty("--popover-foreground", fgHsl);
+
+    // Primary/accent
     root.style.setProperty("--primary", primaryHsl);
     root.style.setProperty("--primary-foreground", primaryFg);
     root.style.setProperty("--ring", primaryHsl);
@@ -62,9 +96,13 @@ export const ClubTheme = () => {
     root.style.setProperty("--sidebar-primary-foreground", primaryFg);
     root.style.setProperty("--sidebar-ring", primaryHsl);
     root.style.setProperty("--accent", secondaryHsl);
-    root.style.setProperty("--accent-foreground", secondaryFg);
-    root.style.setProperty("--border", `${secondaryHsl.split(" ")[0]} 30% 22%`);
-    root.style.setProperty("--sidebar-border", `${secondaryHsl.split(" ")[0]} 30% 22%`);
+    root.style.setProperty("--accent-foreground", readableForegroundHsl(effectiveSecondary));
+
+    // Border
+    root.style.setProperty("--border", `${hue} ${sat} ${isDark ? "22%" : "75%"}`);
+    root.style.setProperty("--sidebar-border", `${hue} ${sat} ${isDark ? "22%" : "75%"}`);
+
+    // Gradient and glow
     root.style.setProperty("--gradient-primary", `linear-gradient(135deg, hsl(${primaryHsl}), hsl(${secondaryHsl}))`);
     root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.35)`);
 
