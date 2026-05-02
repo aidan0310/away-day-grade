@@ -23,7 +23,7 @@ export const PREMIER_LEAGUE_CLUBS: PLClub[] = [
   { name: "Leeds United", stadium: "Elland Road", primaryHex: "#FFCD00", secondaryHex: "#1D428A" },
   { name: "Liverpool", stadium: "Anfield", primaryHex: "#C8102E", secondaryHex: "#F6EB61" },
   { name: "Manchester City", stadium: "Etihad Stadium", primaryHex: "#6CABDD", secondaryHex: "#1C2C5B" },
-  { name: "Manchester United", stadium: "Old Trafford", primaryHex: "#DA291C", secondaryHex: "#FBE122" },
+  { name: "Manchester United", stadium: "Old Trafford", primaryHex: "#DA291C", secondaryHex: "#000000" },
   { name: "Newcastle United", stadium: "St James' Park", primaryHex: "#241F20", secondaryHex: "#BBBCBC" },
   { name: "Nottingham Forest", stadium: "City Ground", primaryHex: "#DD0000", secondaryHex: "#FFFFFF" },
   { name: "Sunderland", stadium: "Stadium of Light", primaryHex: "#FF0000", secondaryHex: "#FFFFFF" },
