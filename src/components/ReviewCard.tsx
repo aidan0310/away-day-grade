@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Calendar, MapPin, Pencil, Trash2, Loader2, Star, Heart, Flag } from "lucide-react";import { format, parseISO } from "date-fns";
+import { Calendar, MapPin, Pencil, Trash2, Loader2, Star, Heart, Flag } from "lucide-react";
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { GradePill } from "./GradePill";
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRank } from "@/lib/ranks";
 import { Avatar } from "@/components/Avatar";
-import { Heart } from "lucide-react";
 
 export type ReviewCardData = {
   id: string;
