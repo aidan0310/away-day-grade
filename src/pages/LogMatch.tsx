@@ -69,6 +69,12 @@ const LogMatch = () => {
   const [pintPrice, setPintPrice] = useState<string>("");
   const [competition, setCompetition] = useState<string>("Premier League");
   const [customStadium, setCustomStadium] = useState("");
+
+  useEffect(() => {
+    if (competition !== "Premier League" && stadium) {
+      setCustomStadium(stadium);
+    }
+  }, [competition, stadium]);
   const [homeScore, setHomeScore] = useState<string>("");
   const [awayScore, setAwayScore] = useState<string>("");
   const [motmPlayer, setMotmPlayer] = useState("");
@@ -129,7 +135,7 @@ const LogMatch = () => {
       toast.error("Please enter the stadium name.");
       return;
     }
-    const parsed = schema.safeParse({ opponent, stadium, match_date: date, note });
+    const parsed = schema.safeParse({ opponent, stadium: resolvedStadium, match_date: date, note });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -248,7 +254,7 @@ const LogMatch = () => {
               </div>
             ) : (
               <Input
-                value={stadium || customStadium}
+                value={customStadium}
                 onChange={(e) => setCustomStadium(e.target.value)}
                 placeholder="e.g. Wembley Stadium"
                 className="h-12 bg-secondary border-0"
