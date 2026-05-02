@@ -90,7 +90,7 @@ const Following = () => {
                   onClick={() => nav(`/user/${f.id}`)}
                   className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-secondary/40 transition-colors border-t border-border/60 first:border-0"
                 >
-                  <Avatar url={r.avatar_url} name={r.display_name} size="md" />
+                  <Avatar url={f.avatar_url} name={f.display_name} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="font-extrabold truncate">@{f.display_name}</p>
                     <p className="text-xs text-muted-foreground">{f.supported_team ?? "No team"}</p>
