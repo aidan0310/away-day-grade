@@ -63,6 +63,7 @@ const LogMatch = () => {
   const [date, setDate] = useState(format(new Date(), "yyyy-MM-dd"));
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
+  const [competition, setCompetition] = useState<string>("Premier League");
   const [homeScore, setHomeScore] = useState<string>("");
   const [awayScore, setAwayScore] = useState<string>("");
   const [motmPlayer, setMotmPlayer] = useState("");
@@ -101,6 +102,7 @@ const LogMatch = () => {
       setDate(data.match_date);
       setNote(data.note ?? "");
       setPintPrice(data.pint_price != null ? String(data.pint_price) : "");
+      setCompetition(data.competition ?? "Premier League");
       setHomeScore(data.home_score != null ? String(data.home_score) : "");
       setAwayScore(data.away_score != null ? String(data.away_score) : "");
       setMotmPlayer(data.motm_player ?? "");
@@ -159,6 +161,7 @@ const LogMatch = () => {
         view_rating: ratings.view_rating,
         scran: ratings.scran,
         damage: ratings.damage,
+        competition,
         pint_price: pintPrice ? Number(parseFloat(pintPrice).toFixed(2)) : null,
         home_score: homeScore !== "" ? parseInt(homeScore) : null,
         away_score: awayScore !== "" ? parseInt(awayScore) : null,
@@ -250,6 +253,26 @@ const LogMatch = () => {
           </Field>
           <Field label="Date">
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12 bg-secondary border-0" />
+          </Field>
+          <Field label="Competition">
+            <Select value={competition} onValueChange={setCompetition}>
+              <SelectTrigger className="h-12 bg-secondary border-0">
+                <SelectValue placeholder="Pick a competition" />
+              </SelectTrigger>
+              <SelectContent className="bg-card">
+                {[
+                  "Premier League",
+                  "Championship",
+                  "FA Cup",
+                  "EFL Cup",
+                  "UEFA Champions League",
+                  "UEFA Europa League",
+                  "UEFA Conference League",
+                ].map((c) => (
+                  <SelectItem key={c} value={c}>{c}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
         </div>
 

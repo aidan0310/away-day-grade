@@ -28,6 +28,7 @@ export type ReviewCardData = {
   pint_price: number | null;
   home_score: number | null;
   away_score: number | null;
+  competition?: string | null;
   like_count?: number;
   user_has_liked?: boolean;
   motm_player?: string | null;
@@ -104,6 +105,11 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
               {data.profile?.supported_team ?? "Fan"}
             </span>
           </div>
+          {data.competition && (
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+              {data.competition}
+            </span>
+          )}
           <h3 className="text-xl font-extrabold leading-tight truncate">
             vs {data.opponent}
           </h3>
