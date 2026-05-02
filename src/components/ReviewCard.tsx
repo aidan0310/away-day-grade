@@ -13,6 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRank } from "@/lib/ranks";
+import { Heart } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type ReviewCardData = {
   id: string;
@@ -27,6 +29,8 @@ export type ReviewCardData = {
   pint_price: number | null;
   home_score: number | null;
   away_score: number | null;
+  like_count?: number;
+  user_has_liked?: boolean;
   motm_player?: string | null;
   motm_comment?: string | null;
   note: string | null;
@@ -49,6 +53,32 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
   const isOwner = user?.id === data.user_id;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [liked, setLiked] = useState(data.user_has_liked ?? false);
+  const [likeCount, setLikeCount] = useState(data.like_count ?? 0);
+  const [liking, setLiking] = useState(false);
+
+  const toggleLike = async () => {
+    if (!user) return;
+    setLiking(true);
+    if (liked) {
+      await supabase.from("likes").delete().eq("user_id", user.id).eq("match_id", data.id);
+      setLiked(false);
+      setLikeCount(c => c - 1);
+    } else {
+      await supabase.from("likes").insert({ user_id: user.id, match_id: data.id });
+      setLiked(true);
+      setLikeCount(c => c + 1);
+      if (!isOwner) {
+        await supabase.from("notifications").insert({
+          user_id: data.user_id,
+          actor_id: user.id,
+          type: "like",
+          match_id: data.id,
+        });
+      }
+    }
+    setLiking(false);
+  };
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -140,7 +170,7 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
         </p>
       )}
 
-      <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border">
+      <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border gap-2">
         <Link
           to={`/user/${data.user_id}`}
           className="font-semibold text-foreground/70 hover:text-primary transition-colors"
@@ -153,6 +183,17 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
             <Calendar className="h-3 w-3" />
             {format(parseISO(data.match_date), "d MMM yyyy")}
           </span>
+          <button
+            onClick={toggleLike}
+            disabled={liking || !user}
+            className={cn(
+              "flex items-center gap-1 font-extrabold transition-colors",
+              liked ? "text-red-400" : "text-muted-foreground hover:text-red-400"
+            )}
+          >
+            <Heart className={cn("h-3.5 w-3.5", liked && "fill-red-400")} />
+            {likeCount > 0 && <span>{likeCount}</span>}
+          </button>
           {isOwner && (
             <div className="flex items-center gap-1">
               <Button

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { ReviewCard, ReviewCardData } from "@/components/ReviewCard";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Plus, Search } from "lucide-react";
+import { Loader2, Plus, Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +18,20 @@ const Feed = () => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const [tab, setTab] = useState<FeedTab>("all");
   const [followingIds, setFollowingIds] = useState<string[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+// Fetch followingIds
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { count } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id)
+        .eq("read", false);
+      setUnreadCount(count ?? 0);
+    })();
+  }, [user]);
 
   // Fetch who the user follows
   useEffect(() => {
@@ -60,6 +74,19 @@ const Feed = () => {
         countMap.set(m.user_id, (countMap.get(m.user_id) ?? 0) + 1);
       });
 
+      const matchIds = matches.map((m: any) => m.id);
+      const { data: likes } = await supabase
+        .from("likes")
+        .select("match_id, user_id")
+        .in("match_id", matchIds);
+
+      const likeCountMap = new Map<string, number>();
+      const userLikedSet = new Set<string>();
+      (likes ?? []).forEach((l: any) => {
+        likeCountMap.set(l.match_id, (likeCountMap.get(l.match_id) ?? 0) + 1);
+        if (l.user_id === user?.id) userLikedSet.add(l.match_id);
+      });
+
       const pmap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
 
       setReviews(matches.map((m: any) => ({
@@ -67,6 +94,8 @@ const Feed = () => {
         profile: pmap.get(m.user_id)
           ? { ...pmap.get(m.user_id), match_count: countMap.get(m.user_id) ?? 0 }
           : null,
+        like_count: likeCountMap.get(m.id) ?? 0,
+        user_has_liked: userLikedSet.has(m.id),
       })));
       setLoading(false);
     })();
@@ -80,12 +109,25 @@ const Feed = () => {
     <AppShell
       title="Terrace"
       right={
-        <button
-          onClick={() => nav("/search")}
-          className="h-9 w-9 flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-primary transition-colors"
-        >
-          <Search className="h-5 w-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => nav("/notifications")}
+            className="relative h-9 w-9 flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Bell className="h-5 w-5" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-white text-[10px] font-extrabold flex items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => nav("/search")}
+            className="h-9 w-9 flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Search className="h-5 w-5" />
+          </button>
+        </div>
       }
     >
       <div className="space-y-5">

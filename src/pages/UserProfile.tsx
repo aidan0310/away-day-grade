@@ -76,6 +76,12 @@ const UserProfile = () => {
         following_id: id,
       });
       setIsFollowing(true);
+      await supabase.from("notifications").insert({
+        user_id: id,
+        actor_id: user.id,
+        type: "follow",
+        match_id: null,
+      });
     }
     setFollowLoading(false);
   };
