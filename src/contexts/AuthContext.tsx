@@ -6,6 +6,7 @@ type Profile = {
   id: string;
   display_name: string;
   supported_team: string | null;
+  avatar_url: string | null;
 };
 
 type AuthCtx = {

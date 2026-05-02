@@ -8,6 +8,7 @@ import { LetterGrade } from "@/components/GradePill";
 import { Button } from "@/components/ui/button";
 import { LogOut, Loader2, Pencil } from "lucide-react";
 import { getRank, getNextRank } from "@/lib/ranks";
+import { Avatar } from "@/components/Avatar";
 import { getSeason, getAllSeasons } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -25,7 +26,7 @@ const Profile = () => {
         .select("*, stadium:stadiums(id,name)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-      setReviews((matches ?? []).map((m: any) => ({ ...m, profile })));
+      setReviews((matches ?? []).map((m: any) => ({ ...m, profile: { ...profile, avatar_url: profile?.avatar_url ?? null } })));
       setLoading(false);
     })();
   }, [user, profile]);
@@ -86,9 +87,7 @@ const seasons = getAllSeasons(reviews.map(r => r.match_date));
     }>
       <div className="space-y-6">
         <div className="stat-card flex items-center gap-4">
-          <div className="h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center text-primary-foreground font-display text-2xl">
-            {profile?.display_name?.[0]?.toUpperCase() ?? "?"}
-          </div>
+          <Avatar url={profile?.avatar_url} name={profile?.display_name} size="lg" />
           <div className="flex-1 min-w-0">
             <p className="font-extrabold text-xl truncate">@{profile?.display_name}</p>
             <p className="text-sm text-muted-foreground">{profile?.supported_team ?? "No team yet"}</p>

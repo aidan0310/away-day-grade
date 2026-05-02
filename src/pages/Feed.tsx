@@ -104,7 +104,7 @@ const Feed = () => {
       setReviews(matches.map((m: any) => ({
         ...m,
         profile: pmap.get(m.user_id)
-          ? { ...pmap.get(m.user_id), match_count: countMap.get(m.user_id) ?? 0 }
+          ? { ...pmap.get(m.user_id), match_count: countMap.get(m.user_id) ?? 0, avatar_url: pmap.get(m.user_id)?.avatar_url ?? null }
           : null,
         like_count: likeCountMap.get(m.id) ?? 0,
         user_has_liked: userLikedSet.has(m.id),

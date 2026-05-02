@@ -5,12 +5,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AppShell } from "@/components/AppShell";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { getRank } from "@/lib/ranks";
+import { Avatar } from "@/components/Avatar";
 
-type Following = {
+type Follower = {
   id: string;
   display_name: string;
   supported_team: string | null;
   match_count: number;
+  avatar_url: string | null;
 };
 
 const Following = () => {
@@ -88,9 +90,7 @@ const Following = () => {
                   onClick={() => nav(`/user/${f.id}`)}
                   className="w-full flex items-center gap-4 px-4 py-3 text-left hover:bg-secondary/40 transition-colors border-t border-border/60 first:border-0"
                 >
-                  <div className="h-10 w-10 rounded-xl bg-gradient-primary flex items-center justify-center text-primary-foreground font-display text-lg shrink-0">
-                    {f.display_name?.[0]?.toUpperCase() ?? "?"}
-                  </div>
+                  <Avatar url={r.avatar_url} name={r.display_name} size="md" />
                   <div className="flex-1 min-w-0">
                     <p className="font-extrabold truncate">@{f.display_name}</p>
                     <p className="text-xs text-muted-foreground">{f.supported_team ?? "No team"}</p>

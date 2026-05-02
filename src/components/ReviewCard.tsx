@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRank } from "@/lib/ranks";
+import { Avatar } from "@/components/Avatar";
 import { Heart } from "lucide-react";
 
 export type ReviewCardData = {
@@ -35,7 +36,7 @@ export type ReviewCardData = {
   motm_comment?: string | null;
   note: string | null;
   stadium: { id: string; name: string };
-  profile: { display_name: string; supported_team: string | null; match_count?: number } | null;
+  profile: { display_name: string; supported_team: string | null; match_count?: number; avatar_url?: string | null } | null;
 };
 
 const avg = (m: ReviewCardData) =>
@@ -178,9 +179,7 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
             className="flex items-center gap-2 hover:text-primary transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="h-7 w-7 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground font-display text-sm shrink-0">
-              {data.profile?.display_name?.[0]?.toUpperCase() ?? "?"}
-            </div>
+            <Avatar url={data.profile?.avatar_url} name={data.profile?.display_name} size="sm" />
             <div>
               <p className="text-sm font-extrabold text-foreground/80 leading-none">@{data.profile?.display_name ?? "fan"}</p>
               {data.profile?.match_count !== undefined && (

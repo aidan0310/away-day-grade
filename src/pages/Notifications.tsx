@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppShell } from "@/components/AppShell";
 import { Loader2, ArrowLeft, Heart, UserPlus } from "lucide-react";
+import { Avatar } from "@/components/Avatar";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
 type Notification = {
@@ -16,9 +17,9 @@ type Notification = {
     id: string;
     display_name: string;
     supported_team: string | null;
+    avatar_url: string | null;
   } | null;
-};
-
+  
 const Notifications = () => {
   const { user } = useAuth();
   const nav = useNavigate();
@@ -72,11 +73,14 @@ const Notifications = () => {
                 }}
                 className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors border-t border-border/60 first:border-0 ${!n.read ? "bg-primary/5" : "hover:bg-secondary/40"}`}
               >
-                <div className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 ${n.type === "like" ? "bg-red-400/20" : "bg-primary/20"}`}>
-                  {n.type === "like"
-                    ? <Heart className="h-4 w-4 text-red-400" />
-                    : <UserPlus className="h-4 w-4 text-primary" />
-                  }
+                <div className="relative shrink-0">
+                  <Avatar url={n.actor?.avatar_url} name={n.actor?.display_name} size="md" />
+                  <div className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-lg flex items-center justify-center ${n.type === "like" ? "bg-red-400" : "bg-primary"}`}>
+                    {n.type === "like"
+                      ? <Heart className="h-3 w-3 text-white" />
+                      : <UserPlus className="h-3 w-3 text-primary-foreground" />
+                    }
+                  </div>
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-extrabold truncate">

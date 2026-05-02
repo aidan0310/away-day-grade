@@ -8,11 +8,13 @@ import { LetterGrade } from "@/components/GradePill";
 import { Button } from "@/components/ui/button";
 import { Loader2, ArrowLeft, Star } from "lucide-react";
 import { getRank, getNextRank } from "@/lib/ranks";
+import { Avatar } from "@/components/Avatar";
 
 type PublicProfile = {
   id: string;
   display_name: string;
   supported_team: string | null;
+  avatar_url: string | null;
 };
 
 const UserProfile = () => {
@@ -122,9 +124,7 @@ const UserProfile = () => {
           <>
             {/* Header */}
             <div className="stat-card flex items-center gap-4">
-              <div className="h-16 w-16 rounded-2xl bg-gradient-primary flex items-center justify-center text-primary-foreground font-display text-2xl shrink-0">
-                {profile.display_name?.[0]?.toUpperCase() ?? "?"}
-              </div>
+              <Avatar url={profile.avatar_url} name={profile.display_name} size="lg" />
               <div className="flex-1 min-w-0">
                 <p className="font-extrabold text-xl truncate">@{profile.display_name}</p>
                 <p className="text-sm text-muted-foreground">{profile.supported_team ?? "No team"}</p>
