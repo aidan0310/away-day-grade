@@ -103,8 +103,14 @@ export const ClubTheme = () => {
     root.style.setProperty("--accent", secondaryHsl);
     root.style.setProperty("--accent-foreground", readableForegroundHsl(effectiveSecondary));
 
+    // Use secondary colour for interactive elements like active pills, highlights
+    root.style.setProperty("--ring", secondaryHsl);
+
     // Gradient and glow
-    root.style.setProperty("--gradient-primary", `hsl(${primaryHsl})`);
+    const usableSecondary = isUsable(effectiveSecondary)
+      ? secondaryHsl
+      : primaryHsl;
+    root.style.setProperty("--gradient-primary", `hsl(${usableSecondary})`);
     root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.5)`);
 
     return () => {
