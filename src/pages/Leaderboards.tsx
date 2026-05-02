@@ -51,18 +51,16 @@ const Leaderboards = () => {
   const userClub = normalizeClubName(profile?.supported_team ?? "");
   const userClubMeta = clubForName(userClub);
 
+  const [tab, setTab] = useState<TabKey>("atmosphere");
   const [matches, setMatches] = useState<Match[]>([]);
   const [stadiums, setStadiums] = useState<Stadium[]>([]);
-  const [tab, setTab] = useState<TabKey>("atmosphere");
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState<{ id: string; display_name: string; supported_team: string | null; avatar_url: string | null; match_count: number }[]>([]);
 
   useEffect(() => {
     (async () => {
       const [{ data: m }, { data: s }] = await Promise.all([
-        supabase
-          .from("matches")
-          .select("stadium_id, is_away, opponent, atmosphere, view_rating, scran, damage, pint_price"),
+        supabase.from("matches").select("stadium_id, is_away, opponent, atmosphere, view_rating, scran, damage, pint_price"),
         supabase.from("stadiums").select("id, name"),
       ]);
       setMatches((m ?? []) as Match[]);
@@ -73,34 +71,26 @@ const Leaderboards = () => {
 
   useEffect(() => {
     (async () => {
-      const { data: allMatches } = await supabase
-        .from("matches")
-        .select("user_id");
-      
+      const { data: allMatches } = await supabase.from("matches").select("user_id");
       if (!allMatches) return;
-
       const countMap = new Map<string, number>();
       allMatches.forEach((m: any) => {
         countMap.set(m.user_id, (countMap.get(m.user_id) ?? 0) + 1);
       });
-
       const userIds = [...countMap.keys()];
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, display_name, supported_team, avatar_url")
         .in("id", userIds);
-
       const ranked = (profiles ?? []).map((p: any) => ({
         ...p,
         match_count: countMap.get(p.id) ?? 0,
       })).sort((a: any, b: any) => b.match_count - a.match_count);
-
       setActiveUsers(ranked);
     })();
   }, []);
 
   const rows: Row[] = useMemo(() => {
-    // Map stadium_id -> club via stadium name lookup against PL list.
     const stadiumIdToClub = new Map<string, string>();
     const clubToStadiumId = new Map<string, string>();
     stadiums.forEach((s) => {
@@ -111,12 +101,9 @@ const Leaderboards = () => {
       }
     });
 
-    // Decide what each match contributes for the active tab.
     const sums = new Map<string, { sum: number; n: number }>();
     matches.forEach((mt) => {
       const stadiumClub = stadiumIdToClub.get(mt.stadium_id);
-
-      // Default: credit the stadium's club (the venue being reviewed).
       let club: string | undefined = stadiumClub;
       let value: number | null = null;
 
@@ -134,8 +121,6 @@ const Leaderboards = () => {
           if (mt.is_away && mt.pint_price != null) value = Number(mt.pint_price);
           break;
         case "away_support":
-          // Home fans rate the visiting (away) team's fans via "Opposition Fan Noise"
-          // (stored in view_rating when is_away=false). Credit the OPPONENT, not the host.
           if (!mt.is_away) {
             value = mt.view_rating;
             const normalizedOpp = normalizeClubName(mt.opponent ?? "");
@@ -162,7 +147,7 @@ const Leaderboards = () => {
 
     const ranked = all.filter((r) => r.count > 0);
     if (tab === "price") {
-      ranked.sort((a, b) => a.score - b.score); // lower is better
+      ranked.sort((a, b) => a.score - b.score);
     } else {
       ranked.sort((a, b) => b.score - a.score);
     }
@@ -174,7 +159,6 @@ const Leaderboards = () => {
   return (
     <AppShell title="Leaderboards">
       <div className="space-y-5">
-        {/* Segmented control */}
         <div className="-mx-1 overflow-x-auto">
           <div className="flex gap-2 px-1 pb-1">
             {TABS.map((t) => (
@@ -196,7 +180,7 @@ const Leaderboards = () => {
 
         <p className="text-sm text-muted-foreground -mt-2">
           {TABS.find((t) => t.key === tab)?.sub}
-          {isPrice ? " — lower is better." : " — out of 10."}
+          {isPrice ? " — lower is better." : tab === "most_active" ? "." : " — out of 10."}
         </p>
 
         {tab === "most_active" ? (
@@ -245,7 +229,6 @@ const Leaderboards = () => {
           </p>
         ) : (
           <div className="rounded-2xl overflow-hidden border border-border bg-card">
-            {/* Header */}
             <div className="grid grid-cols-[3rem_1fr_5rem] gap-3 px-4 py-3 bg-secondary/60 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
               <span>#</span>
               <span>Club</span>
@@ -255,14 +238,7 @@ const Leaderboards = () => {
               const isUser = r.club === userClub;
               const userBgHsl = isUser && userClubMeta ? hexToHslString(userClubMeta.primaryHex) : null;
               const userFgHsl = isUser && userClubMeta ? readableForegroundHsl(userClubMeta.primaryHex) : null;
-
-              const scoreColor = isPrice
-                ? "" // neutral for price
-                : r.score >= 8
-                  ? "text-rating-good"
-                  : r.score < 4
-                    ? "text-rating-bad"
-                    : "text-foreground";
+              const scoreColor = isPrice ? "" : r.score >= 8 ? "text-rating-good" : r.score < 4 ? "text-rating-bad" : "text-foreground";
 
               return (
                 <button
@@ -274,30 +250,13 @@ const Leaderboards = () => {
                     !isUser && "hover:bg-secondary/40",
                     !r.stadiumId && "opacity-70 cursor-default"
                   )}
-                  style={
-                    isUser
-                      ? {
-                          background: `hsl(${userBgHsl})`,
-                          color: `hsl(${userFgHsl})`,
-                        }
-                      : undefined
-                  }
+                  style={isUser ? { background: `hsl(${userBgHsl})`, color: `hsl(${userFgHsl})` } : undefined}
                 >
-                  <span
-                    className={cn(
-                      "font-display text-2xl tracking-wider",
-                      !isUser && (i < 3 ? "text-primary" : "text-muted-foreground")
-                    )}
-                  >
+                  <span className={cn("font-display text-2xl tracking-wider", !isUser && (i < 3 ? "text-primary" : "text-muted-foreground"))}>
                     {i + 1}
                   </span>
                   <span className="font-extrabold truncate">{r.club}</span>
-                  <span
-                    className={cn(
-                      "text-right font-display text-2xl tracking-wider",
-                      !isUser && scoreColor
-                    )}
-                  >
+                  <span className={cn("text-right font-display text-2xl tracking-wider", !isUser && scoreColor)}>
                     {isPrice ? `£${r.score.toFixed(2)}` : r.score.toFixed(1)}
                   </span>
                 </button>
