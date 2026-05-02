@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { PREMIER_LEAGUE_CLUBS } from "@/lib/premier-league";
+import { ALL_FOOTBALL_CLUBS } from "@/lib/all-clubs";
 
 const Onboarding = () => {
   const nav = useNavigate();
@@ -44,7 +44,7 @@ const Onboarding = () => {
               <SelectValue placeholder="Pick your Premier League club" />
             </SelectTrigger>
             <SelectContent className="max-h-80 bg-card">
-              {PREMIER_LEAGUE_CLUBS.map((c) => (
+              {ALL_FOOTBALL_CLUBS.map((c) => (
                 <SelectItem key={c.name} value={c.name}>
                   {c.name}
                 </SelectItem>

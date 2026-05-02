@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { clubForName, hexToHslString, readableForegroundHsl } from "@/lib/premier-league";
+import { allClubForName } from "@/lib/all-clubs";
 
 /**
  * Applies the supported club's brand colors to the app by overriding
@@ -28,7 +29,9 @@ export const ClubTheme = () => {
       "--shadow-glow",
     ];
 
-    const club = teamName ? clubForName(teamName) : undefined;
+    const plClub = teamName ? clubForName(teamName) : undefined;
+    const eflClub = teamName ? allClubForName(teamName) : undefined;
+    const club = plClub ?? eflClub;
     if (!club) {
       tokens.forEach((t) => root.style.removeProperty(t));
       return;

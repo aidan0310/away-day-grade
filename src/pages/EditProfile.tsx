@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
-import { PREMIER_LEAGUE_CLUBS } from "@/lib/premier-league";
+import { ALL_FOOTBALL_CLUBS } from "@/lib/all-clubs";
 
 const EditProfile = () => {
   const nav = useNavigate();
@@ -79,11 +79,11 @@ const EditProfile = () => {
                 <SelectValue placeholder="Pick your Premier League club" />
               </SelectTrigger>
               <SelectContent className="max-h-80 bg-card">
-                {PREMIER_LEAGUE_CLUBS.map((c) => (
-                  <SelectItem key={c.name} value={c.name}>
-                    {c.name}
-                  </SelectItem>
-                ))}
+                {ALL_FOOTBALL_CLUBS.map((c) => (
+                <SelectItem key={c.name} value={c.name}>
+                  {c.name}
+                </SelectItem>
+              ))}
               </SelectContent>
             </Select>
           </div>
