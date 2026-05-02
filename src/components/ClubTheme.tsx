@@ -78,21 +78,22 @@ export const ClubTheme = () => {
     const secondaryHsl = hexToHslString(effectiveSecondary);
     const primaryFg = readableForegroundHsl(effectivePrimary);
 
-    // Keep backgrounds dark/neutral but tinted very subtly with club hue
-    root.style.setProperty("--background", `${h} 15% 7%`);
-    root.style.setProperty("--foreground", `0 0% 95%`);
-    root.style.setProperty("--card", `${h} 12% 12%`);
-    root.style.setProperty("--card-foreground", `0 0% 95%`);
-    root.style.setProperty("--muted", `${h} 10% 16%`);
-    root.style.setProperty("--muted-foreground", `${h} 8% 60%`);
-    root.style.setProperty("--secondary", `${h} 10% 16%`);
-    root.style.setProperty("--secondary-foreground", `0 0% 95%`);
-    root.style.setProperty("--popover", `${h} 12% 12%`);
-    root.style.setProperty("--popover-foreground", `0 0% 95%`);
-    root.style.setProperty("--border", `${h} 15% 20%`);
-    root.style.setProperty("--sidebar-border", `${h} 15% 20%`);
+    // Deep saturated background using club hue — feels immersive
+    const sat = Math.min(s, 80); // cap saturation so it doesn't go neon
+    root.style.setProperty("--background", `${h} ${sat}% 10%`);
+    root.style.setProperty("--foreground", `0 0% 97%`);
+    root.style.setProperty("--card", `${h} ${sat - 10}% 15%`);
+    root.style.setProperty("--card-foreground", `0 0% 97%`);
+    root.style.setProperty("--muted", `${h} ${sat - 15}% 20%`);
+    root.style.setProperty("--muted-foreground", `0 0% 65%`);
+    root.style.setProperty("--secondary", `${h} ${sat - 15}% 20%`);
+    root.style.setProperty("--secondary-foreground", `0 0% 97%`);
+    root.style.setProperty("--popover", `${h} ${sat - 10}% 15%`);
+    root.style.setProperty("--popover-foreground", `0 0% 97%`);
+    root.style.setProperty("--border", `${h} ${sat - 20}% 25%`);
+    root.style.setProperty("--sidebar-border", `${h} ${sat - 20}% 25%`);
 
-    // Primary/accent — club colours used boldly
+    // Primary/accent
     root.style.setProperty("--primary", primaryHsl);
     root.style.setProperty("--primary-foreground", primaryFg);
     root.style.setProperty("--ring", primaryHsl);
@@ -104,7 +105,7 @@ export const ClubTheme = () => {
 
     // Gradient and glow
     root.style.setProperty("--gradient-primary", `linear-gradient(135deg, hsl(${primaryHsl}), hsl(${secondaryHsl}))`);
-    root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.4)`);
+    root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.5)`);
 
     return () => {
       tokens.forEach((t) => root.style.removeProperty(t));
