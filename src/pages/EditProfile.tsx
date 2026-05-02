@@ -34,7 +34,6 @@ const EditProfile = () => {
         .update({
           display_name: displayName.trim(),
         })
-        })
         .eq("id", user.id);
       if (error) throw error;
       await refreshProfile();
