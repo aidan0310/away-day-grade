@@ -224,6 +224,8 @@ const Leaderboards = () => {
                     <div className="flex items-center gap-2 min-w-0">
                       <Avatar url={u.avatar_url} name={u.display_name} size="sm" />
                       </div>
+                      <div className="flex items-center gap-2 min-w-0">
+                      <Avatar url={u.avatar_url} name={u.display_name} size="sm" />
                       <div className="min-w-0">
                         <p className="font-extrabold truncate text-sm">@{u.display_name}</p>
                         <p className="text-[10px] text-muted-foreground truncate">{u.supported_team ?? ""}</p>
