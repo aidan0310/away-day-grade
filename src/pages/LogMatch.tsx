@@ -16,6 +16,9 @@ import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
 import { MotmCombobox } from "@/components/MotmCombobox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { ChevronDown } from "lucide-react";
 
 // Same 4 DB columns (atmosphere, view_rating, scran, damage) reused with
 // different meanings depending on whether the user attended as a Home or Away fan.
@@ -64,6 +67,7 @@ const LogMatch = () => {
   const [note, setNote] = useState("");
   const [pintPrice, setPintPrice] = useState<string>("");
   const [competition, setCompetition] = useState<string>("Premier League");
+  const [customStadium, setCustomStadium] = useState("");
   const [homeScore, setHomeScore] = useState<string>("");
   const [awayScore, setAwayScore] = useState<string>("");
   const [motmPlayer, setMotmPlayer] = useState("");
@@ -119,12 +123,9 @@ const LogMatch = () => {
 
   const submit = async () => {
     if (!user) return;
-    if (!stadium) {
-      toast.error(
-        isAway
-          ? "Pick an opponent to set the stadium."
-          : "Set your Premier League club in your profile first."
-      );
+    const resolvedStadium = competition === "Premier League" ? stadium : customStadium.trim();
+    if (!resolvedStadium) {
+      toast.error("Please enter the stadium name.");
       return;
     }
     const parsed = schema.safeParse({ opponent, stadium, match_date: date, note });
@@ -139,13 +140,13 @@ const LogMatch = () => {
     setSaving(true);
     try {
       // upsert stadium by name (and tag the home team if known)
-      const { data: existing } = await supabase.from("stadiums").select("id").eq("name", stadium.trim()).maybeSingle();
+      const { data: existing } = await supabase.from("stadiums").select("id").eq("name", resolvedStadium).maybeSingle();
       let stadiumId = existing?.id;
       if (!stadiumId) {
         const homeTeam = isAway ? opponent : normalizedSupportedTeam;
         const { data: created, error: cErr } = await supabase
           .from("stadiums")
-          .insert({ name: stadium.trim(), team: homeTeam || null })
+          .insert({ name: resolvedStadium, team: homeTeam || null })
           .select("id")
           .single();
         if (cErr) throw cErr;
@@ -225,31 +226,33 @@ const LogMatch = () => {
 
         <div className="space-y-4 stat-card">
           <Field label="Opponent">
-            <Select value={opponent} onValueChange={setOpponent}>
-              <SelectTrigger className="h-12 bg-secondary border-0">
-                <SelectValue placeholder="Pick a Premier League club" />
-              </SelectTrigger>
-              <SelectContent className="max-h-72 bg-card">
-                {opponentOptions.map((c) => (
-                  <SelectItem key={c.name} value={c.name}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <OpponentCombobox
+              value={opponent}
+              onChange={setOpponent}
+              exclude={normalizedSupportedTeam}
+            />
           </Field>
           <Field label="Stadium">
-            <div className="h-12 flex items-center gap-2 rounded-md bg-secondary/60 px-3 border border-dashed border-border">
-              <MapPin className="h-4 w-4 text-primary shrink-0" />
-              <span className={cn("text-sm font-bold truncate", stadium ? "text-foreground" : "text-muted-foreground")}>
-                {stadium ||
-                  (isAway
-                    ? "Pick an opponent to set stadium"
-                    : supportedTeam
-                      ? "Your saved club is not a Premier League club"
-                      : "Set your club in profile to auto-fill")}
-              </span>
-            </div>
+            {competition === "Premier League" ? (
+              <div className="h-12 flex items-center gap-2 rounded-md bg-secondary/60 px-3 border border-dashed border-border">
+                <MapPin className="h-4 w-4 text-primary shrink-0" />
+                <span className={cn("text-sm font-bold truncate", stadium ? "text-foreground" : "text-muted-foreground")}>
+                  {stadium ||
+                    (isAway
+                      ? "Pick an opponent to set stadium"
+                      : supportedTeam
+                        ? "Your saved club is not a Premier League club"
+                        : "Set your club in profile to auto-fill")}
+                </span>
+              </div>
+            ) : (
+              <Input
+                value={stadium || customStadium}
+                onChange={(e) => setCustomStadium(e.target.value)}
+                placeholder="e.g. Wembley Stadium"
+                className="h-12 bg-secondary border-0"
+              />
+            )}
           </Field>
           <Field label="Date">
             <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="h-12 bg-secondary border-0" />
@@ -381,5 +384,93 @@ const RatingRow = ({ label, desc, value, onChange }: { label: string; desc: stri
     </div>
   );
 };
+const ALL_CLUBS = [
+  // Premier League
+  "Arsenal", "Aston Villa", "AFC Bournemouth", "Brentford", "Brighton & Hove Albion",
+  "Burnley", "Chelsea", "Crystal Palace", "Everton", "Fulham",
+  "Leeds United", "Liverpool", "Manchester City", "Manchester United",
+  "Newcastle United", "Nottingham Forest", "Sunderland", "Tottenham Hotspur",
+  "West Ham United", "Wolverhampton Wanderers",
+  // Championship
+  "Birmingham City", "Blackburn Rovers", "Bristol City", "Charlton Athletic",
+  "Coventry City", "Derby County", "Hull City", "Ipswich Town", "Leicester City",
+  "Middlesbrough", "Millwall", "Norwich City", "Oxford United", "Portsmouth",
+  "Preston North End", "Queens Park Rangers", "Sheffield United", "Sheffield Wednesday",
+  "Southampton", "Stoke City", "Swansea City", "Watford", "West Bromwich Albion",
+  "Wrexham",
+  // League One
+  "AFC Wimbledon", "Barnsley", "Blackpool", "Bolton Wanderers", "Bradford City",
+  "Burton Albion", "Cardiff City", "Doncaster Rovers", "Exeter City", "Huddersfield Town",
+  "Leyton Orient", "Lincoln City", "Luton Town", "Mansfield Town", "Northampton Town",
+  "Peterborough United", "Plymouth Argyle", "Port Vale", "Reading", "Rotherham United",
+  "Stevenage", "Stockport County", "Wigan Athletic", "Wycombe Wanderers",
+  // League Two
+  "Accrington Stanley", "Barnet", "Barrow", "Bristol Rovers", "Bromley",
+  "Cambridge United", "Cheltenham Town", "Chesterfield", "Colchester United",
+  "Crawley Town", "Crewe Alexandra", "Fleetwood Town", "Gillingham", "Grimsby Town",
+  "Harrogate Town", "Milton Keynes Dons", "Newport County", "Notts County",
+  "Oldham Athletic", "Salford City", "Shrewsbury Town", "Swindon Town",
+  "Tranmere Rovers", "Walsall",
+].sort();
 
+const OpponentCombobox = ({ value, onChange, exclude }: {
+  value: string;
+  onChange: (v: string) => void;
+  exclude: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState(value);
+
+  useEffect(() => { setQuery(value); }, [value]);
+
+  const filtered = ALL_CLUBS.filter(c =>
+    c !== exclude &&
+    c.toLowerCase().includes(query.toLowerCase())
+  );
+
+  const pick = (name: string) => {
+    onChange(name);
+    setQuery(name);
+    setOpen(false);
+  };
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className={cn(
+            "h-12 w-full rounded-md bg-secondary px-3 flex items-center justify-between text-sm font-bold border-0",
+            !value && "text-muted-foreground"
+          )}
+        >
+          <span className="truncate">{value || "Pick or type a club"}</span>
+          <ChevronDown className="h-4 w-4 opacity-60 shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] bg-popover" align="start">
+        <Command shouldFilter={false}>
+          <CommandInput
+            placeholder="Type a club name..."
+            value={query}
+            onValueChange={setQuery}
+          />
+          <CommandList className="max-h-[280px]">
+            {filtered.length === 0 ? (
+              <CommandEmpty>No clubs found.</CommandEmpty>
+            ) : (
+              <CommandGroup>
+                {filtered.map((c) => (
+                  <CommandItem key={c} value={c} onSelect={() => pick(c)}>
+                    {c}
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            )}
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
+};
 export default LogMatch;
