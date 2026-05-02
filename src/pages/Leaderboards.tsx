@@ -53,6 +53,7 @@ const Leaderboards = () => {
 
   const [matches, setMatches] = useState<Match[]>([]);
   const [stadiums, setStadiums] = useState<Stadium[]>([]);
+  const [tab, setTab] = useState<TabKey>("atmosphere");
   const [loading, setLoading] = useState(true);
   const [activeUsers, setActiveUsers] = useState<{ id: string; display_name: string; supported_team: string | null; avatar_url: string | null; match_count: number }[]>([]);
 
@@ -222,9 +223,6 @@ const Leaderboards = () => {
                       {i + 1}
                     </span>
                     <div className="flex items-center gap-2 min-w-0">
-                      <Avatar url={u.avatar_url} name={u.display_name} size="sm" />
-                      </div>
-                      <div className="flex items-center gap-2 min-w-0">
                       <Avatar url={u.avatar_url} name={u.display_name} size="sm" />
                       <div className="min-w-0">
                         <p className="font-extrabold truncate text-sm">@{u.display_name}</p>
