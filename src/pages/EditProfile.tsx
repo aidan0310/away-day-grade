@@ -10,6 +10,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { ALL_FOOTBALL_CLUBS } from "@/lib/all-clubs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const EditProfile = () => {
   const nav = useNavigate();
@@ -17,6 +21,11 @@ const EditProfile = () => {
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
   const [supportedTeam, setSupportedTeam] = useState(profile?.supported_team ?? "");
   const [saving, setSaving] = useState(false);
+  const [clubOpen, setClubOpen] = useState(false);
+  const [clubQuery, setClubQuery] = useState(profile?.supported_team ?? "");
+  const filteredClubs = ALL_FOOTBALL_CLUBS.filter(c =>
+    c.name.toLowerCase().includes(clubQuery.toLowerCase())
+  );
 
   const save = async () => {
     if (!user) return;
@@ -74,18 +83,50 @@ const EditProfile = () => {
             <Label className="text-[11px] font-extrabold uppercase tracking-widest text-muted-foreground">
               Supported Club
             </Label>
-            <Select value={supportedTeam} onValueChange={setSupportedTeam}>
-              <SelectTrigger className="h-12 bg-secondary border-0">
-                <SelectValue placeholder="Pick your Premier League club" />
-              </SelectTrigger>
-              <SelectContent className="max-h-80 bg-card">
-                {ALL_FOOTBALL_CLUBS.map((c) => (
-                <SelectItem key={c.name} value={c.name}>
-                  {c.name}
-                </SelectItem>
-              ))}
-              </SelectContent>
-            </Select>
+            <Popover open={clubOpen} onOpenChange={setClubOpen}>
+              <PopoverTrigger asChild>
+                <button
+                  type="button"
+                  className={cn(
+                    "h-12 w-full rounded-md bg-secondary border-0 px-3 flex items-center justify-between text-sm font-bold",
+                    !supportedTeam && "text-muted-foreground"
+                  )}
+                >
+                  <span className="truncate">{supportedTeam || "Search for your club..."}</span>
+                  <ChevronDown className="h-4 w-4 opacity-60 shrink-0" />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] bg-popover" align="start">
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Type a club name..."
+                    value={clubQuery}
+                    onValueChange={setClubQuery}
+                  />
+                  <CommandList className="max-h-[300px]">
+                    {filteredClubs.length === 0 ? (
+                      <CommandEmpty>No clubs found.</CommandEmpty>
+                    ) : (
+                      <>
+                        {["Premier League", "Championship", "League One", "League Two"].map(league => {
+                          const clubs = filteredClubs.filter(c => c.league === league);
+                          if (clubs.length === 0) return null;
+                          return (
+                            <CommandGroup key={league} heading={league}>
+                              {clubs.map(c => (
+                                <CommandItem key={c.name} value={c.name} onSelect={() => { setSupportedTeam(c.name); setClubQuery(c.name); setClubOpen(false); }}>
+                                  {c.name}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          );
+                        })}
+                      </>
+                    )}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
 
