@@ -104,7 +104,7 @@ export const ClubTheme = () => {
     root.style.setProperty("--accent-foreground", readableForegroundHsl(effectiveSecondary));
 
     // Gradient and glow
-    root.style.setProperty("--gradient-primary", `linear-gradient(135deg, hsl(${primaryHsl}), hsl(${secondaryHsl}))`);
+    root.style.setProperty("--gradient-primary", `hsl(${primaryHsl})`);
     root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.5)`);
 
     return () => {
