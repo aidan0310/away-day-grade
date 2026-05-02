@@ -104,3 +104,6 @@
     box-shadow: var(--shadow-glow);
   }
 }
+.bg-gradient-primary {
+    background: var(--gradient-primary) !important;
+  }
