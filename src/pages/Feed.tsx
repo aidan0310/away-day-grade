@@ -20,19 +20,6 @@ const Feed = () => {
   const [followingIds, setFollowingIds] = useState<string[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-// Fetch followingIds
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { count } = await supabase
-        .from("notifications")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user.id)
-        .eq("read", false);
-      setUnreadCount(count ?? 0);
-    })();
-  }, [user]);
-
   // Fetch who the user follows
   useEffect(() => {
     if (!user) return;
@@ -69,6 +56,8 @@ const Feed = () => {
         .limit(50);
 
       if (!matches) { setLoading(false); return; }
+
+      const userIds = [...new Set(matches.map((m: any) => m.user_id))];
 
       const { data: profiles } = await supabase
         .from("profiles")
