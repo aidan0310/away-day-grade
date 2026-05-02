@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
+import { eflStadiumForClub } from "@/lib/efl-stadiums";
 import { MotmCombobox } from "@/components/MotmCombobox";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -56,7 +57,7 @@ const LogMatch = () => {
   // Stadium is determined by venue: home = supporter's club, away = opponent's club.
   const stadium = useMemo(() => {
     const club = isAway ? opponent : normalizedSupportedTeam;
-    return stadiumForClub(club) ?? "";
+    return stadiumForClub(club) ?? eflStadiumForClub(club) ?? "";
   }, [isAway, opponent, normalizedSupportedTeam]);
 
   const opponentOptions = useMemo(
