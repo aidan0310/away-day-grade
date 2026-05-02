@@ -1,36 +1,21 @@
-// Premier League 2025/26 season clubs and their home stadiums.
-// Used to enforce consistent naming across reviews.
+import { ALL_FOOTBALL_CLUBS } from "@/lib/all-clubs";
+
 export type PLClub = {
   name: string;
   stadium: string;
-  /** Brand primary in hex (e.g. #EF0107). */
   primaryHex: string;
-  /** Brand secondary in hex. */
   secondaryHex: string;
 };
 
-export const PREMIER_LEAGUE_CLUBS: PLClub[] = [
-  { name: "Arsenal", stadium: "Emirates Stadium", primaryHex: "#EF0107", secondaryHex: "#FFFFFF" },
-  { name: "Aston Villa", stadium: "Villa Park", primaryHex: "#95BFE5", secondaryHex: "#670E36" },
-  { name: "Bournemouth", stadium: "Vitality Stadium", primaryHex: "#DA291C", secondaryHex: "#000000" },
-  { name: "Brentford", stadium: "Gtech Community Stadium", primaryHex: "#E30613", secondaryHex: "#FFFFFF" },
-  { name: "Brighton & Hove Albion", stadium: "Amex Stadium", primaryHex: "#0057B8", secondaryHex: "#FFCD00" },
-  { name: "Burnley", stadium: "Turf Moor", primaryHex: "#6C1D45", secondaryHex: "#99D6EA" },
-  { name: "Chelsea", stadium: "Stamford Bridge", primaryHex: "#034694", secondaryHex: "#DBA111" },
-  { name: "Crystal Palace", stadium: "Selhurst Park", primaryHex: "#1B458F", secondaryHex: "#C4122E" },
-  { name: "Everton", stadium: "Hill Dickinson Stadium", primaryHex: "#003399", secondaryHex: "#FFFFFF" },
-  { name: "Fulham", stadium: "Craven Cottage", primaryHex: "#f8f8f8", secondaryHex: "#000000" },
-  { name: "Leeds United", stadium: "Elland Road", primaryHex: "#FFCD00", secondaryHex: "#ffffff" },
-  { name: "Liverpool", stadium: "Anfield", primaryHex: "#C8102E", secondaryHex: "#F6EB61" },
-  { name: "Manchester City", stadium: "Etihad Stadium", primaryHex: "#6CABDD", secondaryHex: "#ffffff" },
-  { name: "Manchester United", stadium: "Old Trafford", primaryHex: "#DA291C", secondaryHex: "#000000" },
-  { name: "Newcastle United", stadium: "St James' Park", primaryHex: "#241F20", secondaryHex: "#BBBCBC" },
-  { name: "Nottingham Forest", stadium: "City Ground", primaryHex: "#DD0000", secondaryHex: "#FFFFFF" },
-  { name: "Sunderland", stadium: "Stadium of Light", primaryHex: "#FF0000", secondaryHex: "#FFFFFF" },
-  { name: "Tottenham Hotspur", stadium: "Tottenham Hotspur Stadium", primaryHex: "#132257", secondaryHex: "#FFFFFF" },
-  { name: "West Ham United", stadium: "London Stadium", primaryHex: "#7A263A", secondaryHex: "#1BB1E7" },
-  { name: "Wolverhampton Wanderers", stadium: "Molineux Stadium", primaryHex: "#FDB913", secondaryHex: "#231F20" },
-];
+// Derived from all-clubs.ts — single source of truth
+export const PREMIER_LEAGUE_CLUBS: PLClub[] = ALL_FOOTBALL_CLUBS
+  .filter(c => c.league === "Premier League")
+  .map(c => ({
+    name: c.name,
+    stadium: c.stadium,
+    primaryHex: c.primaryHex,
+    secondaryHex: c.secondaryHex,
+  }));
 
 export const CLUB_NAMES = PREMIER_LEAGUE_CLUBS.map((c) => c.name);
 
@@ -57,6 +42,9 @@ const CLUB_ALIASES: Record<string, string> = {
   "forest": "Nottingham Forest",
   "west ham": "West Ham United",
   "west ham united": "West Ham United",
+  "nott'm forest": "Nottingham Forest",
+  "afc bournemouth": "AFC Bournemouth",
+  "bournemouth": "AFC Bournemouth",
 };
 
 export const normalizeClubName = (club: string): string => {
@@ -68,13 +56,6 @@ export const stadiumForClub = (club: string): string | undefined => {
   const normalizedClub = normalizeClubName(club);
   return PREMIER_LEAGUE_CLUBS.find((c) => c.name === normalizedClub)?.stadium;
 };
-
-// Add 'forest' alias mapping was already present. Add a few more shorthand club aliases used by theme picker.
-const EXTRA_ALIASES: Record<string, string> = {
-  "nott'm forest": "Nottingham Forest",
-  "brighton and hove albion": "Brighton & Hove Albion",
-};
-Object.assign(CLUB_ALIASES, EXTRA_ALIASES);
 
 export const clubForName = (club: string): PLClub | undefined => {
   const normalizedClub = normalizeClubName(club);
@@ -105,7 +86,6 @@ export const hexToHslString = (hex: string): string => {
   return `${Math.round(hue)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
 };
 
-// Relative luminance for picking a readable foreground.
 const relLuminance = (hex: string): number => {
   const h = hex.replace("#", "");
   const toLin = (c: number) => {
