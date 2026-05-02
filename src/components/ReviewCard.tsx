@@ -103,11 +103,6 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
             <span className="text-xs font-medium text-muted-foreground">
               {data.profile?.supported_team ?? "Fan"}
             </span>
-            {data.profile?.match_count !== undefined && (
-              <span className={`text-xs font-extrabold uppercase tracking-wider ${getRank(data.profile.match_count).color}`}>
-                {getRank(data.profile.match_count).label}
-              </span>
-            )}
           </div>
           <h3 className="text-xl font-extrabold leading-tight truncate">
             vs {data.opponent}
@@ -169,49 +164,67 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
         </p>
       )}
 
-      <footer className="flex items-center justify-between text-xs text-muted-foreground pt-1 border-t border-border gap-2">
-        <Link
-          to={`/user/${data.user_id}`}
-          className="font-semibold text-foreground/70 hover:text-primary transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          @{data.profile?.display_name ?? "fan"}
-        </Link>
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1">
+      <footer className="pt-3 border-t border-border space-y-3">
+        {/* Top row — user info + date */}
+        <div className="flex items-center justify-between">
+          <Link
+            to={`/user/${data.user_id}`}
+            className="flex items-center gap-2 hover:text-primary transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="h-7 w-7 rounded-lg bg-gradient-primary flex items-center justify-center text-primary-foreground font-display text-sm shrink-0">
+              {data.profile?.display_name?.[0]?.toUpperCase() ?? "?"}
+            </div>
+            <div>
+              <p className="text-sm font-extrabold text-foreground/80 leading-none">@{data.profile?.display_name ?? "fan"}</p>
+              {data.profile?.match_count !== undefined && (
+                <p className={`text-[10px] font-extrabold uppercase tracking-wider ${getRank(data.profile.match_count).color}`}>
+                  {getRank(data.profile.match_count).label}
+                </p>
+              )}
+            </div>
+          </Link>
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Calendar className="h-3 w-3" />
             {format(parseISO(data.match_date), "d MMM yyyy")}
           </span>
+        </div>
+
+        {/* Bottom row — like + edit/delete */}
+        <div className="flex items-center justify-between">
           <button
             onClick={toggleLike}
             disabled={liking || !user}
             className={cn(
-              "flex items-center gap-1 font-extrabold transition-colors",
-              liked ? "text-red-400" : "text-muted-foreground hover:text-red-400"
+              "flex items-center gap-2 rounded-xl px-3 py-1.5 border transition-colors font-extrabold text-sm",
+              liked
+                ? "border-red-400/40 bg-red-400/10 text-red-400"
+                : "border-border text-muted-foreground hover:border-red-400/40 hover:text-red-400"
             )}
           >
-            <Heart className={cn("h-3.5 w-3.5", liked && "fill-red-400")} />
-            {likeCount > 0 && <span>{likeCount}</span>}
+            <Heart className={cn("h-4 w-4", liked && "fill-red-400")} />
+            <span>{likeCount > 0 ? likeCount : ""} {liked ? "Liked" : "Like"}</span>
           </button>
+
           {isOwner && (
             <div className="flex items-center gap-1">
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-7 w-7 text-muted-foreground hover:text-primary"
+                className="h-8 w-8 text-muted-foreground hover:text-primary"
                 onClick={() => nav(`/log/${data.id}`)}
                 aria-label="Edit review"
               >
-                <Pencil className="h-3.5 w-3.5" />
+                <Pencil className="h-4 w-4" />
               </Button>
               <Button
                 size="icon"
                 variant="ghost"
-                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                className="h-8 w-8 text-muted-foreground hover:text-destructive"
                 onClick={() => setConfirmOpen(true)}
                 aria-label="Delete review"
               >
-                <Trash2 className="h-3.5 w-3.5" />
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           )}
