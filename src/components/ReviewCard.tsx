@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Calendar, MapPin, Pencil, Trash2, Loader2, Star } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { Calendar, MapPin, Pencil, Trash2, Loader2, Star, Heart, Flag } from "lucide-react";import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { GradePill } from "./GradePill";
 import { Button } from "@/components/ui/button";
@@ -57,6 +56,34 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
   const [liked, setLiked] = useState(data.user_has_liked ?? false);
   const [likeCount, setLikeCount] = useState(data.like_count ?? 0);
   const [liking, setLiking] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportMessage, setReportMessage] = useState("");
+  const [reporting, setReporting] = useState(false);
+
+  const submitReport = async () => {
+    if (!user || !reportReason) return;
+    setReporting(true);
+    const { error } = await supabase.from("reports").insert({
+      reporter_id: user.id,
+      match_id: data.id,
+      reason: reportReason,
+      message: reportMessage.trim() || null,
+    });
+    setReporting(false);
+    if (error) {
+      if (error.message.includes("unique")) {
+        toast.error("You've already reported this review.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
+    setReportOpen(false);
+    setReportReason("");
+    setReportMessage("");
+    toast.success("Review reported. We'll look into it.");
+  };
 
   const toggleLike = async () => {
     if (!user) return;
@@ -211,6 +238,19 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
             <span>{likeCount > 0 ? likeCount : ""} {liked ? "Liked" : "Like"}</span>
           </button>
 
+          <div className="flex items-center gap-1">
+            {!isOwner && (
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-muted-foreground hover:text-yellow-500"
+                onClick={() => setReportOpen(true)}
+                aria-label="Report review"
+              >
+                <Flag className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
           {isOwner && (
             <div className="flex items-center gap-1">
               <Button
@@ -235,6 +275,47 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
           )}
         </div>
       </footer>
+
+      <AlertDialog open={reportOpen} onOpenChange={setReportOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Report Review</AlertDialogTitle>
+            <AlertDialogDescription>
+              Let us know why this review seems suspicious or inappropriate.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <select
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              className="w-full h-10 rounded-lg bg-secondary border-0 px-3 text-sm font-bold text-foreground"
+            >
+              <option value="">Select a reason...</option>
+              <option value="fake_review">Fake or spam review</option>
+              <option value="never_attended">User likely never attended</option>
+              <option value="inappropriate">Inappropriate content</option>
+              <option value="wrong_info">Wrong match information</option>
+              <option value="other">Other</option>
+            </select>
+            <textarea
+              value={reportMessage}
+              onChange={(e) => setReportMessage(e.target.value.slice(0, 300))}
+              placeholder="Additional details (optional)"
+              className="w-full rounded-lg bg-secondary border-0 px-3 py-2 text-sm text-foreground min-h-[80px] resize-none"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={reporting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); submitReport(); }}
+              disabled={reporting || !reportReason}
+              className="bg-yellow-500 text-black font-extrabold hover:bg-yellow-400"
+            >
+              {reporting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Report"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>
