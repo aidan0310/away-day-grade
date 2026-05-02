@@ -37,11 +37,6 @@ export const ClubTheme = () => {
       "--sidebar-primary", "--sidebar-primary-foreground", "--sidebar-ring",
       "--accent", "--accent-foreground", "--border", "--sidebar-border",
       "--gradient-primary", "--shadow-glow",
-      "--background", "--foreground",
-      "--card", "--card-foreground",
-      "--muted", "--muted-foreground",
-      "--secondary", "--secondary-foreground",
-      "--popover", "--popover-foreground",
     ];
 
     const plClub = teamName ? clubForName(teamName) : undefined;
@@ -73,27 +68,13 @@ export const ClubTheme = () => {
       ? club.secondaryHex
       : club.primaryHex;
 
-    const { h, s } = hexToHslParts(effectivePrimary);
     const primaryHsl = hexToHslString(effectivePrimary);
     const secondaryHsl = hexToHslString(effectiveSecondary);
     const primaryFg = readableForegroundHsl(effectivePrimary);
 
-    // Deep saturated background using club hue — feels immersive
-    const sat = Math.min(s, 80); // cap saturation so it doesn't go neon
-    root.style.setProperty("--background", `${h} ${sat}% 10%`);
-    root.style.setProperty("--foreground", `0 0% 97%`);
-    root.style.setProperty("--card", `${h} ${sat - 10}% 15%`);
-    root.style.setProperty("--card-foreground", `0 0% 97%`);
-    root.style.setProperty("--muted", `${h} ${sat - 15}% 20%`);
-    root.style.setProperty("--muted-foreground", `0 0% 65%`);
-    root.style.setProperty("--secondary", `${h} ${sat - 15}% 20%`);
-    root.style.setProperty("--secondary-foreground", `0 0% 97%`);
-    root.style.setProperty("--popover", `${h} ${sat - 10}% 15%`);
-    root.style.setProperty("--popover-foreground", `0 0% 97%`);
-    root.style.setProperty("--border", `${h} ${sat - 20}% 25%`);
-    root.style.setProperty("--sidebar-border", `${h} ${sat - 20}% 25%`);
+    const usableSecondary = isUsable(effectiveSecondary) ? secondaryHsl : primaryHsl;
 
-    // Primary/accent
+    // Only override primary/accent colours — keep background/card dark
     root.style.setProperty("--primary", primaryHsl);
     root.style.setProperty("--primary-foreground", primaryFg);
     root.style.setProperty("--ring", primaryHsl);
@@ -102,16 +83,10 @@ export const ClubTheme = () => {
     root.style.setProperty("--sidebar-ring", primaryHsl);
     root.style.setProperty("--accent", secondaryHsl);
     root.style.setProperty("--accent-foreground", readableForegroundHsl(effectiveSecondary));
-
-    // Use secondary colour for interactive elements like active pills, highlights
-    root.style.setProperty("--ring", secondaryHsl);
-
-    // Gradient and glow
-    const usableSecondary = isUsable(effectiveSecondary)
-      ? secondaryHsl
-      : primaryHsl;
+    root.style.setProperty("--border", `${hexToHslParts(effectivePrimary).h} 20% 20%`);
+    root.style.setProperty("--sidebar-border", `${hexToHslParts(effectivePrimary).h} 20% 20%`);
     root.style.setProperty("--gradient-primary", `hsl(${usableSecondary})`);
-    root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.5)`);
+    root.style.setProperty("--shadow-glow", `0 0 40px hsl(${primaryHsl} / 0.4)`);
 
     return () => {
       tokens.forEach((t) => root.style.removeProperty(t));
