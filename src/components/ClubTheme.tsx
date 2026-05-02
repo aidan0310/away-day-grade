@@ -13,6 +13,7 @@ export const ClubTheme = () => {
   const teamName = profile?.supported_team ?? "";
 
   useEffect(() => {
+    try {
     const root = document.documentElement;
     const tokens = [
       "--primary",
@@ -65,6 +66,9 @@ export const ClubTheme = () => {
     return () => {
       tokens.forEach((t) => root.style.removeProperty(t));
     };
+    } catch (e) {
+      console.error("ClubTheme error:", e);
+    }
   }, [teamName]);
 
   return null;
