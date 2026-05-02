@@ -19,7 +19,8 @@ type Notification = {
     supported_team: string | null;
     avatar_url: string | null;
   } | null;
-  
+};
+
 const Notifications = () => {
   const { user } = useAuth();
   const nav = useNavigate();
