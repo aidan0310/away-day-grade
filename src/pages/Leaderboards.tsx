@@ -12,8 +12,9 @@ import {
   readableForegroundHsl,
   normalizeClubName,
 } from "@/lib/premier-league";
+import { Avatar } from "@/components/Avatar";
 
-type TabKey = "atmosphere" | "scran" | "view" | "price" | "away_support";
+type TabKey = "atmosphere" | "scran" | "view" | "price" | "away_support" | "most_active";
 
 const TABS: { key: TabKey; label: string; sub: string }[] = [
   { key: "atmosphere", label: "Atmosphere", sub: "Away fan scores" },
@@ -21,6 +22,7 @@ const TABS: { key: TabKey; label: string; sub: string }[] = [
   { key: "view", label: "The View", sub: "Stadium sightlines" },
   { key: "price", label: "Price/Value", sub: "Lowest avg pint £" },
   { key: "away_support", label: "Away Support", sub: "Home fan scores of visitors" },
+  { key: "most_active", label: "Most Active", sub: "Most matches logged" },
 ];
 
 type Match = {
@@ -49,10 +51,10 @@ const Leaderboards = () => {
   const userClub = normalizeClubName(profile?.supported_team ?? "");
   const userClubMeta = clubForName(userClub);
 
-  const [tab, setTab] = useState<TabKey>("atmosphere");
   const [matches, setMatches] = useState<Match[]>([]);
   const [stadiums, setStadiums] = useState<Stadium[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeUsers, setActiveUsers] = useState<{ id: string; display_name: string; supported_team: string | null; avatar_url: string | null; match_count: number }[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -65,6 +67,34 @@ const Leaderboards = () => {
       setMatches((m ?? []) as Match[]);
       setStadiums((s ?? []) as Stadium[]);
       setLoading(false);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data: allMatches } = await supabase
+        .from("matches")
+        .select("user_id");
+      
+      if (!allMatches) return;
+
+      const countMap = new Map<string, number>();
+      allMatches.forEach((m: any) => {
+        countMap.set(m.user_id, (countMap.get(m.user_id) ?? 0) + 1);
+      });
+
+      const userIds = [...countMap.keys()];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name, supported_team, avatar_url")
+        .in("id", userIds);
+
+      const ranked = (profiles ?? []).map((p: any) => ({
+        ...p,
+        match_count: countMap.get(p.id) ?? 0,
+      })).sort((a: any, b: any) => b.match_count - a.match_count);
+
+      setActiveUsers(ranked);
     })();
   }, []);
 
@@ -168,7 +198,44 @@ const Leaderboards = () => {
           {isPrice ? " — lower is better." : " — out of 10."}
         </p>
 
-        {loading ? (
+        {tab === "most_active" ? (
+          activeUsers.length === 0 ? (
+            <p className="text-center text-muted-foreground py-16">No data yet.</p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden border border-border bg-card">
+              <div className="grid grid-cols-[3rem_1fr_5rem] gap-3 px-4 py-3 bg-secondary/60 text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                <span>#</span>
+                <span>Fan</span>
+                <span className="text-right">Matches</span>
+              </div>
+              {activeUsers.map((u, i) => {
+                const isUser = u.id === profile?.id;
+                return (
+                  <div
+                    key={u.id}
+                    className={cn(
+                      "grid grid-cols-[3rem_1fr_5rem] gap-3 px-4 py-3 items-center border-t border-border/60",
+                      isUser && "bg-primary/10"
+                    )}
+                  >
+                    <span className={cn("font-display text-2xl tracking-wider", i < 3 ? "text-primary" : "text-muted-foreground")}>
+                      {i + 1}
+                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Avatar url={u.avatar_url} name={u.display_name} size="sm" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-extrabold truncate text-sm">@{u.display_name}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{u.supported_team ?? ""}</p>
+                      </div>
+                    </div>
+                    <span className="text-right font-display text-2xl tracking-wider text-primary">{u.match_count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )
+        ) : loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
