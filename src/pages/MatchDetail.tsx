@@ -14,17 +14,20 @@ const MatchDetail = () => {
   const [loading, setLoading] = useState(true);
 
   const decoded = decodeURIComponent(key ?? "");
-  const [opponent, matchDate, competition] = decoded.split("__");
+  const [homeTeam, awayTeam, matchDate, competition] = decoded.split("__");
 
   useEffect(() => {
-    if (!opponent || !matchDate) return;
+    if (!homeTeam || !awayTeam || !matchDate) return;
     (async () => {
+      // Fetch reviews where either:
+      // - reviewer is away fan (is_away=true) and opponent=homeTeam
+      // - reviewer is home fan (is_away=false) and opponent=awayTeam
       const { data: matches } = await supabase
         .from("matches")
-        .select("*, stadium:stadiums(id,name)")
-        .eq("opponent", opponent)
+        .select("*, stadium:stadiums(id,name), profiles:user_id(supported_team)")
         .eq("match_date", matchDate)
         .eq("competition", competition ?? "Premier League")
+        .or(`and(is_away.eq.true,opponent.eq.${homeTeam}),and(is_away.eq.false,opponent.eq.${awayTeam})`)
         .order("created_at", { ascending: false });
 
       if (!matches) { setLoading(false); return; }
@@ -54,6 +57,7 @@ const MatchDetail = () => {
       const userLikedSet = new Set<string>();
       (likes ?? []).forEach((l: any) => {
         likeCountMap.set(l.match_id, (likeCountMap.get(l.match_id) ?? 0) + 1);
+        if (l.user_id === userIds[0]) userLikedSet.add(l.match_id);
       });
 
       const pmap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
@@ -67,7 +71,7 @@ const MatchDetail = () => {
       })));
       setLoading(false);
     })();
-  }, [opponent, matchDate, competition]);
+  }, [homeTeam, awayTeam, matchDate, competition]);
 
   const avg = (arr: number[]) => arr.reduce((a, b) => a + b, 0) / arr.length;
 
@@ -88,8 +92,6 @@ const MatchDetail = () => {
     }, {} as Record<string, number>)
   ).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-  const isAway = reviews[0]?.is_away;
-
   return (
     <AppShell>
       <div className="space-y-6">
@@ -106,21 +108,16 @@ const MatchDetail = () => {
           </div>
         ) : (
           <>
-            {/* Header */}
             <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <span className={`rounded-md px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider ${isAway ? "bg-accent text-accent-foreground" : "bg-secondary text-foreground"}`}>
-                  {isAway ? "Away" : "Home"}
-                </span>
-                <span className="text-xs text-muted-foreground">{competition}</span>
-              </div>
-              <h1 className="font-display text-4xl tracking-wider leading-none">vs {opponent}</h1>
+              <p className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">{competition}</p>
+              <h1 className="font-display text-3xl tracking-wider leading-tight">
+                {homeTeam} <span className="text-muted-foreground">vs</span> {awayTeam}
+              </h1>
               <p className="text-sm text-muted-foreground">
                 {matchDate ? format(parseISO(matchDate), "d MMMM yyyy") : ""}
               </p>
             </div>
 
-            {/* Overall grade */}
             {avgs && (
               <div className="stat-card flex items-center gap-5">
                 <LetterGrade value={overall} size="lg" />
@@ -132,17 +129,15 @@ const MatchDetail = () => {
               </div>
             )}
 
-            {/* Avg stats */}
             {avgs && (
               <div className="grid grid-cols-4 gap-2">
-                <Mini label={isAway ? "Atmos" : "Home Atmos"} v={avgs.atmosphere} />
-                <Mini label={isAway ? "View" : "Away Fans"} v={avgs.view} />
-                <Mini label={isAway ? "Scran" : "Team"} v={avgs.scran} />
-                <Mini label={isAway ? "Team" : "Logistics"} v={avgs.damage} />
+                <Mini label="Atmos" v={avgs.atmosphere} />
+                <Mini label="View" v={avgs.view} />
+                <Mini label="Scran" v={avgs.scran} />
+                <Mini label="Team" v={avgs.damage} />
               </div>
             )}
 
-            {/* MOTM leaderboard */}
             {motmLeaderboard.length > 0 && (
               <div className="space-y-3">
                 <h2 className="font-display text-2xl tracking-wider">Man of the Match</h2>
@@ -168,10 +163,11 @@ const MatchDetail = () => {
               </div>
             )}
 
-            {/* Reviews */}
             <div className="space-y-3">
               <h2 className="font-display text-2xl tracking-wider">Reviews</h2>
-              {reviews.map(r => (
+              {reviews.length === 0 ? (
+                <p className="text-sm text-muted-foreground">No reviews yet.</p>
+              ) : reviews.map(r => (
                 <ReviewCard
                   key={r.id}
                   data={r}
