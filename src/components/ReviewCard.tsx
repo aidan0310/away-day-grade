@@ -201,6 +201,7 @@ const [shareOpen, setShareOpen] = useState(false);
       )}
 
       <footer className="pt-3 border-t border-border space-y-3">
+        {shareOpen && <ShareScorecard data={data} onClose={() => setShareOpen(false)} />}
         {/* Top row — user info + date */}
         <div className="flex items-center justify-between">
           <Link
@@ -224,8 +225,7 @@ const [shareOpen, setShareOpen] = useState(false);
           </span>
         </div>
 
-        {shareOpen && <ShareScorecard data={data} onClose={() => setShareOpen(false)} />}
-        {/* Bottom row — like + edit/delete */}
+        {/* Bottom row — like + share + edit/delete */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button
@@ -236,17 +236,17 @@ const [shareOpen, setShareOpen] = useState(false);
             </button>
             <button
               onClick={toggleLike}
-            disabled={liking || !user}
-            className={cn(
-              "flex items-center gap-2 rounded-xl px-3 py-1.5 border transition-colors font-extrabold text-sm",
-              liked
-                ? "border-red-400/40 bg-red-400/10 text-red-400"
-                : "border-border text-muted-foreground hover:border-red-400/40 hover:text-red-400"
-            )}
-          >
-            <Heart className={cn("h-4 w-4", liked && "fill-red-400")} />
-            <span>{likeCount > 0 ? likeCount : ""} {liked ? "Liked" : "Like"}</span>
-          </button>
+              disabled={liking || !user}
+              className={cn(
+                "flex items-center gap-2 rounded-xl px-3 py-1.5 border transition-colors font-extrabold text-sm",
+                liked
+                  ? "border-red-400/40 bg-red-400/10 text-red-400"
+                  : "border-border text-muted-foreground hover:border-red-400/40 hover:text-red-400"
+              )}
+            >
+              <Heart className={cn("h-4 w-4", liked && "fill-red-400")} />
+              <span>{likeCount > 0 ? likeCount : ""} {liked ? "Liked" : "Like"}</span>
+            </button>
           </div>
 
           <div className="flex items-center gap-1">
@@ -261,29 +261,29 @@ const [shareOpen, setShareOpen] = useState(false);
                 <Flag className="h-4 w-4" />
               </Button>
             )}
+            {isOwner && (
+              <>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-muted-foreground hover:text-primary"
+                  onClick={() => nav(`/log/${data.id}`)}
+                  aria-label="Edit review"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                  onClick={() => setConfirmOpen(true)}
+                  aria-label="Delete review"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            )}
           </div>
-          {isOwner && (
-            <div className="flex items-center gap-1">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-muted-foreground hover:text-primary"
-                onClick={() => nav(`/log/${data.id}`)}
-                aria-label="Edit review"
-              >
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                onClick={() => setConfirmOpen(true)}
-                aria-label="Delete review"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
         </div>
       </footer>
 
