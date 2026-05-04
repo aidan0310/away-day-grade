@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { Calendar, MapPin, Pencil, Trash2, Loader2, Star, Heart, Flag } from "lucide-react";
+import { Calendar, MapPin, Pencil, Trash2, Loader2, Star, Heart, Flag, Share2 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { useState } from "react";
 import { GradePill } from "./GradePill";
@@ -10,6 +10,7 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { ShareScorecard } from "./ShareScorecard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRank } from "@/lib/ranks";
@@ -57,6 +58,7 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
   const [likeCount, setLikeCount] = useState(data.like_count ?? 0);
   const [liking, setLiking] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+const [shareOpen, setShareOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [reportMessage, setReportMessage] = useState("");
   const [reporting, setReporting] = useState(false);
@@ -224,8 +226,15 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
 
         {/* Bottom row — like + edit/delete */}
         <div className="flex items-center justify-between">
-          <button
-            onClick={toggleLike}
+          {shareOpen && <ShareScorecard data={data} onClose={() => setShareOpen(false)} />}
+<button
+  onClick={() => setShareOpen(true)}
+  className="flex items-center gap-2 rounded-xl px-3 py-1.5 border border-border text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors font-extrabold text-sm"
+>
+  <Share2 className="h-4 w-4" />
+</button>
+<button
+  onClick={toggleLike}
             disabled={liking || !user}
             className={cn(
               "flex items-center gap-2 rounded-xl px-3 py-1.5 border transition-colors font-extrabold text-sm",
