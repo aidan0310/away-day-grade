@@ -21,7 +21,7 @@ export const BottomNav = () => {
           return (
             <Link key={to} to={to} className={cn(
               "flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs font-semibold transition-colors",
-              active ? "text-white" : "text-muted-foreground"
+              active ? "text-primary" : "text-muted-foreground"
             )}>
               <Icon className="h-5 w-5" />
               {label}
