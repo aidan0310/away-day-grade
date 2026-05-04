@@ -10,17 +10,14 @@ const items: { to: string; icon: React.ElementType; label: string }[] = [
   { to: "/leaderboards", icon: BarChart3, label: "Boards" },
   { to: "/profile", icon: User, label: "Profile" },
 ];
-];
 
 export const BottomNav = () => {
   const { pathname } = useLocation();
   return (
     <nav className="fixed bottom-0 inset-x-0 z-40 border-t border-border bg-card/95 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex max-w-md items-center justify-around px-2 py-2">
-        {items.map(({ to, icon: Icon, label, primary }) => {
+        {items.map(({ to, icon: Icon, label }) => {
           const active = pathname === to || (to !== "/" && pathname.startsWith(to));
-          return (
-          
           return (
             <Link key={to} to={to} className={cn(
               "flex flex-col items-center gap-1 rounded-xl px-4 py-2 text-xs font-semibold transition-colors",
