@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { ReviewCardData } from "./ReviewCard";
-import { gradeLabel, gradeColor } from "./GradePill";
+import { gradeLabel } from "./GradePill";
 import { Share2, Download, X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getRank } from "@/lib/ranks";
