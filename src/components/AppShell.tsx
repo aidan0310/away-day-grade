@@ -1,5 +1,7 @@
 import { ReactNode } from "react";
 import { BottomNav } from "./BottomNav";
+import { Link } from "react-router-dom";
+import { Plus } from "lucide-react";
 
 export const AppShell = ({ children, title, right }: { children: ReactNode; title?: string; right?: ReactNode }) => (
   <div className="min-h-screen pb-28">
@@ -12,6 +14,12 @@ export const AppShell = ({ children, title, right }: { children: ReactNode; titl
       </header>
     )}
     <main className="mx-auto max-w-md px-5 py-5">{children}</main>
+    <Link
+      to="/log"
+      className="fixed bottom-20 right-5 z-50 h-14 w-14 rounded-full bg-gradient-primary text-primary-foreground shadow-glow flex items-center justify-center transition-transform active:scale-95 hover:opacity-90"
+    >
+      <Plus className="h-7 w-7" strokeWidth={2.5} />
+    </Link>
     <BottomNav />
   </div>
 );
