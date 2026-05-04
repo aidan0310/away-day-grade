@@ -29,14 +29,19 @@ const Matches = () => {
     (async () => {
       const { data } = await supabase
         .from("matches")
-        .select("opponent, match_date, competition, is_away, atmosphere, view_rating, scran, damage, stadium:stadiums(id, name), profiles:user_id(supported_team)");
+        .select("opponent, match_date, competition, is_away, atmosphere, view_rating, scran, damage, user_id, stadium:stadiums(id, name)");
 
       if (!data) { setLoading(false); return; }
 
-      const groupMap = new Map<string, MatchGroup>();
+      const userIds = [...new Set(data.map((m: any) => m.user_id))];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, supported_team")
+        .in("id", userIds);
+      const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
 
       data.forEach((m: any) => {
-        const supportedTeam = m.profiles?.supported_team ?? "Unknown";
+        const supportedTeam = profileMap.get(m.user_id)?.supported_team ?? "Unknown";
         const homeTeam = m.is_away ? m.opponent : supportedTeam;
         const awayTeam = m.is_away ? supportedTeam : m.opponent;
         const key = `${homeTeam}__${awayTeam}__${m.match_date}__${m.competition ?? "Premier League"}`;
