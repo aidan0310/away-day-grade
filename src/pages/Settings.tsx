@@ -110,13 +110,13 @@ const Settings = () => {
               <button
                 onClick={toggleDarkMode}
                 className={cn(
-                  "relative h-7 w-11 rounded-full transition-colors",
+                  "relative h-7 w-14 rounded-full transition-colors",
 darkMode ? "bg-secondary" : "bg-primary"
                 )}
               >
                 <span className={cn(
                   "absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform",
-darkMode ? "translate-x-1" : "translate-x-5"
+darkMode ? "translate-x-1" : "translate-x-7"
                 )} />
               </button>
             </div>
@@ -142,13 +142,13 @@ darkMode ? "translate-x-1" : "translate-x-5"
                   savePrivacy(newVal, reviewVisibility);
                 }}
                 className={cn(
-                  "relative h-7 w-11 rounded-full transition-colors",
+                  "relative h-7 w-14 rounded-full transition-colors",
 isPrivate ? "bg-primary" : "bg-secondary"
                 )}
               >
                 <span className={cn(
                   "absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform",
-isPrivate ? "translate-x-5" : "translate-x-1"
+isPrivate ? "translate-x-7" : "translate-x-1"
                 )} />
               </button>
             </div>
