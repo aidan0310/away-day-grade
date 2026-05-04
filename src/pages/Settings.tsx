@@ -116,7 +116,7 @@ const Settings = () => {
               >
                 <span className={cn(
                   "absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-transform",
-                  darkMode ? "translate-x-6" : "translate-x-1"
+                  darkMode ? "translate-x-1" : "translate-x-6"
                 )} />
               </button>
             </div>
