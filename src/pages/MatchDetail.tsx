@@ -22,13 +22,25 @@ const MatchDetail = () => {
       // Fetch reviews where either:
       // - reviewer is away fan (is_away=true) and opponent=homeTeam
       // - reviewer is home fan (is_away=false) and opponent=awayTeam
-      const { data: matches } = await supabase
+      const { data: awayReviews } = await supabase
         .from("matches")
-        .select("*, stadium:stadiums(id,name), profiles:user_id(supported_team)")
+        .select("*, stadium:stadiums(id,name)")
         .eq("match_date", matchDate)
         .eq("competition", competition ?? "Premier League")
-        .or(`and(is_away.eq.true,opponent.eq.${homeTeam}),and(is_away.eq.false,opponent.eq.${awayTeam})`)
+        .eq("is_away", true)
+        .eq("opponent", homeTeam)
         .order("created_at", { ascending: false });
+
+      const { data: homeReviews } = await supabase
+        .from("matches")
+        .select("*, stadium:stadiums(id,name)")
+        .eq("match_date", matchDate)
+        .eq("competition", competition ?? "Premier League")
+        .eq("is_away", false)
+        .eq("opponent", awayTeam)
+        .order("created_at", { ascending: false });
+
+      const matches = [...(awayReviews ?? []), ...(homeReviews ?? [])];
 
       if (!matches) { setLoading(false); return; }
 
