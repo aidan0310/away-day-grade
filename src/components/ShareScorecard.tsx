@@ -64,17 +64,25 @@ export const ShareScorecard = ({ data, onClose }: Props) => {
         canvas.toBlob((b) => res(b!), "image/png")
       );
 
-      if (download || !navigator.share) {
-        const url = URL.createObjectURL(blob);
+     const url = URL.createObjectURL(blob);
+      if (!download && navigator.share && navigator.canShare?.({ files: [new File([blob], "scorecard.png", { type: "image/png" })] })) {
+        try {
+          const file = new File([blob], "scorecard.png", { type: "image/png" });
+          await navigator.share({ files: [file], title: "My Away Day Scorecard" });
+        } catch (e) {
+          // User cancelled or share failed — fall back to download
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `away-day-${data.opponent.replace(/\s/g, "-").toLowerCase()}.png`;
+          a.click();
+        }
+      } else {
         const a = document.createElement("a");
         a.href = url;
         a.download = `away-day-${data.opponent.replace(/\s/g, "-").toLowerCase()}.png`;
         a.click();
-        URL.revokeObjectURL(url);
-      } else {
-        const file = new File([blob], "scorecard.png", { type: "image/png" });
-        await navigator.share({ files: [file], title: "My Away Day Scorecard" });
       }
+      URL.revokeObjectURL(url);
     } catch (e) {
       console.error(e);
     } finally {
