@@ -123,9 +123,12 @@ const MatchDetail = () => {
             <div className="space-y-2">
               <p className="text-xs font-extrabold uppercase tracking-widest text-muted-foreground">{competition}</p>
               <h1 className="font-display text-3xl tracking-wider leading-tight">
-                {homeTeam} vs
+                {homeTeam}
               </h1>
-              <h1 className="font-display text-3xl tracking-wider leading-tight text-muted-foreground">
+              <h1 className="font-display text-2xl tracking-wider leading-tight text-muted-foreground">
+                vs
+              </h1>
+              <h1 className="font-display text-3xl tracking-wider leading-tight">
                 {awayTeam}
               </h1>
               <p className="text-sm text-muted-foreground">
