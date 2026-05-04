@@ -6,7 +6,7 @@ import { AppShell } from "@/components/AppShell";
 import { ReviewCard, ReviewCardData } from "@/components/ReviewCard";
 import { LetterGrade } from "@/components/GradePill";
 import { Button } from "@/components/ui/button";
-import { LogOut, Loader2, Pencil } from "lucide-react";
+import { LogOut, Loader2, Pencil, Settings } from "lucide-react";
 import { getRank, getNextRank } from "@/lib/ranks";
 import { Avatar } from "@/components/Avatar";
 import { getSeason, getAllSeasons } from "@/lib/utils";
@@ -82,6 +82,7 @@ const seasons = getAllSeasons(reviews.map(r => r.match_date));
     <AppShell title="Profile" right={
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" onClick={() => nav("/profile/edit")}><Pencil className="h-5 w-5" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => nav("/settings")}><Settings className="h-5 w-5" /></Button>
         <Button variant="ghost" size="icon" onClick={onSignOut}><LogOut className="h-5 w-5" /></Button>
       </div>
     }>
