@@ -37,9 +37,11 @@ const Settings = () => {
     if (darkMode) {
       root.classList.add("light");
       root.classList.remove("dark");
+      localStorage.setItem("theme", "light");
     } else {
       root.classList.remove("light");
       root.classList.add("dark");
+      localStorage.setItem("theme", "dark");
     }
     setDarkMode(!darkMode);
   };
