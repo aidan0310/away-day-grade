@@ -40,6 +40,8 @@ const Matches = () => {
         .in("id", userIds);
       const profileMap = new Map((profiles ?? []).map((p: any) => [p.id, p]));
 
+      const groupMap = new Map<string, MatchGroup>();
+
       data.forEach((m: any) => {
         const supportedTeam = profileMap.get(m.user_id)?.supported_team ?? "Unknown";
         const homeTeam = m.is_away ? m.opponent : supportedTeam;
