@@ -119,9 +119,8 @@ const Matches = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground font-extrabold uppercase tracking-wider">{m.competition}</span>
                   </div>
-                  <p className="font-extrabold text-lg leading-tight">
-                    {m.home_team} <span className="text-muted-foreground font-bold">vs</span> {m.away_team}
-                  </p>
+                  <p className="font-extrabold text-lg leading-none">{m.home_team} vs</p>
+                  <p className="font-extrabold text-lg leading-tight text-muted-foreground">{m.away_team}</p>
                   <div className="flex items-center gap-3 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
