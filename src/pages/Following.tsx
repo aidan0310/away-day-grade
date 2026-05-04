@@ -18,7 +18,7 @@ type Follower = {
 const Following = () => {
   const { user } = useAuth();
   const nav = useNavigate();
-  const [following, setFollowing] = useState<Following[]>([]);
+  const [following, setFollowing] = useState<Follower[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

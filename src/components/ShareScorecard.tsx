@@ -20,7 +20,7 @@ const RatingBar = ({ label, value }: { label: string; value: number }) => {
     <div style={{ marginBottom: 6 }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 3 }}>
         <span style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "#9ca3af" }}>{label}</span>
-        <span style={{ fontSize: 12, fontWeight: 800, color }}>{value}</span>
+        <span style={{ fontSize: 12, fontWeight: 800, color: color }}>{value}</span>
       </div>
       <div style={{ height: 4, borderRadius: 2, background: "#1f2937", overflow: "hidden" }}>
         <div style={{ height: "100%", width: `${value * 10}%`, background: color, borderRadius: 2, transition: "width 0.3s" }} />

@@ -7,6 +7,8 @@ type Profile = {
   display_name: string;
   supported_team: string | null;
   avatar_url: string | null;
+  is_private?: boolean;
+  review_visibility?: string;
 };
 
 type AuthCtx = {

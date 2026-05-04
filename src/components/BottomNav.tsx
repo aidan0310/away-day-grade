@@ -1,13 +1,15 @@
+import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, User, Trophy, BarChart3, Swords } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const items = [
+const items: { to: string; icon: React.ElementType; label: string }[] = [
   { to: "/", icon: Home, label: "Feed" },
   { to: "/stadiums", icon: Trophy, label: "Stadiums" },
   { to: "/matches", icon: Swords, label: "Matches" },
   { to: "/leaderboards", icon: BarChart3, label: "Boards" },
   { to: "/profile", icon: User, label: "Profile" },
+];
 ];
 
 export const BottomNav = () => {
@@ -17,6 +19,7 @@ export const BottomNav = () => {
       <div className="mx-auto flex max-w-md items-center justify-around px-2 py-2">
         {items.map(({ to, icon: Icon, label, primary }) => {
           const active = pathname === to || (to !== "/" && pathname.startsWith(to));
+          return (
           
           return (
             <Link key={to} to={to} className={cn(

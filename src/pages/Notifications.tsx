@@ -32,7 +32,7 @@ const Notifications = () => {
     (async () => {
       const { data } = await supabase
         .from("notifications")
-        .select("id, type, read, created_at, match_id, actor:actor_id(id, display_name, supported_team)")
+        .select("id, type, read, created_at, match_id, actor:profiles!notifications_actor_id_fkey(id, display_name, supported_team, avatar_url)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false })
         .limit(50);
