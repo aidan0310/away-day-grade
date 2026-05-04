@@ -224,17 +224,18 @@ const [shareOpen, setShareOpen] = useState(false);
           </span>
         </div>
 
+        {shareOpen && <ShareScorecard data={data} onClose={() => setShareOpen(false)} />}
         {/* Bottom row — like + edit/delete */}
         <div className="flex items-center justify-between">
-          {shareOpen && <ShareScorecard data={data} onClose={() => setShareOpen(false)} />}
-<button
-  onClick={() => setShareOpen(true)}
-  className="flex items-center gap-2 rounded-xl px-3 py-1.5 border border-border text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors font-extrabold text-sm"
->
-  <Share2 className="h-4 w-4" />
-</button>
-<button
-  onClick={toggleLike}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShareOpen(true)}
+              className="flex items-center gap-2 rounded-xl px-3 py-1.5 border border-border text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors font-extrabold text-sm"
+            >
+              <Share2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={toggleLike}
             disabled={liking || !user}
             className={cn(
               "flex items-center gap-2 rounded-xl px-3 py-1.5 border transition-colors font-extrabold text-sm",
@@ -246,6 +247,7 @@ const [shareOpen, setShareOpen] = useState(false);
             <Heart className={cn("h-4 w-4", liked && "fill-red-400")} />
             <span>{likeCount > 0 ? likeCount : ""} {liked ? "Liked" : "Like"}</span>
           </button>
+          </div>
 
           <div className="flex items-center gap-1">
             {!isOwner && (
