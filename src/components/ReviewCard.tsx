@@ -152,23 +152,22 @@ const [shareOpen, setShareOpen] = useState(false);
             <span className="truncate">{data.stadium.name}</span>
           </Link>
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          <GradePill value={grade} size="md" />
-          {photos.length > 0 && (
-            <div className="flex gap-1.5">
-              {photos.map((url, i) => (
-                <button
-                  key={url}
-                  onClick={() => { setPhotoIndex(i); setPhotoViewerOpen(true); }}
-                  className="h-16 w-16 rounded-xl overflow-hidden border border-border"
-                >
-                  <img src={url} alt="Match photo" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+       <GradePill value={grade} size="md" />
       </header>
+
+      {photos.length > 0 && (
+        <div className="flex gap-2 -mt-1">
+          {photos.map((url, i) => (
+            <button
+              key={url}
+              onClick={() => { setPhotoIndex(i); setPhotoViewerOpen(true); }}
+              className="flex-1 h-40 rounded-xl overflow-hidden border border-border"
+            >
+              <img src={url} alt="Match photo" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
 
       {data.home_score != null && data.away_score != null && (() => {
         const userIsHome = !data.is_away;
