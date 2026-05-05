@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { getRank } from "@/lib/ranks";
 import { Avatar } from "@/components/Avatar";
+import { PhotoViewer } from "./PhotoViewer";
 
 export type ReviewCardData = {
   id: string;
@@ -59,6 +60,9 @@ export const ReviewCard = ({ data, onDeleted }: Props) => {
   const [liking, setLiking] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
 const [shareOpen, setShareOpen] = useState(false);
+  const [photoViewerOpen, setPhotoViewerOpen] = useState(false);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const photos: string[] = (data as any).photos ?? [];
   const [reportReason, setReportReason] = useState("");
   const [reportMessage, setReportMessage] = useState("");
   const [reporting, setReporting] = useState(false);
@@ -198,6 +202,23 @@ const [shareOpen, setShareOpen] = useState(false);
         <p className="text-sm text-foreground/80 leading-relaxed border-l-2 border-primary pl-3">
           "{data.note}"
         </p>
+      )}
+
+      {photos.length > 0 && (
+        <div className="flex gap-2">
+          {photos.map((url, i) => (
+            <button
+              key={url}
+              onClick={() => { setPhotoIndex(i); setPhotoViewerOpen(true); }}
+              className="h-20 flex-1 rounded-xl overflow-hidden border border-border"
+            >
+              <img src={url} alt="Match photo" className="h-full w-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+      {photoViewerOpen && (
+        <PhotoViewer photos={photos} initialIndex={photoIndex} onClose={() => setPhotoViewerOpen(false)} />
       )}
 
       <footer className="pt-3 border-t border-border space-y-3">

@@ -23,10 +23,10 @@ const Profile = () => {
     (async () => {
       const { data: matches } = await supabase
         .from("matches")
-        .select("*, stadium:stadiums(id,name)")
+        .select("*, stadium:stadiums(id,name), photos:match_photos(url)")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
-      setReviews((matches ?? []).map((m: any) => ({ ...m, profile: { ...profile, avatar_url: profile?.avatar_url ?? null } })));
+      setReviews((matches ?? []).map((m: any) => ({ ...m, photos: (m.photos ?? []).map((p: any) => p.url), profile: { ...profile, avatar_url: profile?.avatar_url ?? null } })));
       setLoading(false);
     })();
   }, [user, profile]);

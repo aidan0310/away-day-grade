@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { PREMIER_LEAGUE_CLUBS, normalizeClubName, stadiumForClub } from "@/lib/premier-league";
 import { eflStadiumForClub } from "@/lib/efl-stadiums";
 import { MotmCombobox } from "@/components/MotmCombobox";
+import { PhotoUploader } from "@/components/PhotoUploader";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { ChevronDown } from "lucide-react";
@@ -79,6 +80,7 @@ const LogMatch = () => {
   const [awayScore, setAwayScore] = useState<string>("");
   const [motmPlayer, setMotmPlayer] = useState("");
   const [motmComment, setMotmComment] = useState("");
+  const [photos, setPhotos] = useState<string[]>([]);
   const [ratings, setRatings] = useState<Record<string, number>>({
     atmosphere: 7, view_rating: 7, scran: 5, damage: 5,
   });
@@ -118,6 +120,12 @@ const LogMatch = () => {
       setAwayScore(data.away_score != null ? String(data.away_score) : "");
       setMotmPlayer(data.motm_player ?? "");
       setMotmComment(data.motm_comment ?? "");
+      // Load existing photos
+      const { data: existingPhotos } = await supabase
+        .from("match_photos")
+        .select("url")
+        .eq("match_id", editId);
+      setPhotos((existingPhotos ?? []).map((p: any) => p.url));
       setRatings({
         atmosphere: data.atmosphere,
         view_rating: data.view_rating,
@@ -178,6 +186,7 @@ const LogMatch = () => {
         note: note.trim() || null,
       };
 
+      let matchId = editId;
       if (isEdit && editId) {
         const { error } = await supabase
           .from("matches")
@@ -185,11 +194,24 @@ const LogMatch = () => {
           .eq("id", editId)
           .eq("user_id", user.id);
         if (error) throw error;
+        // Delete old photos and re-insert
+        await supabase.from("match_photos").delete().eq("match_id", editId);
         toast.success("Review updated.");
       } else {
-        const { error } = await supabase.from("matches").insert({ ...payload, user_id: user.id });
+        const { data: newMatch, error } = await supabase
+          .from("matches")
+          .insert({ ...payload, user_id: user.id })
+          .select("id")
+          .single();
         if (error) throw error;
+        matchId = newMatch.id;
         toast.success("Match logged. Up the lads.");
+      }
+      // Save photos
+      if (photos.length > 0 && matchId) {
+        await supabase.from("match_photos").insert(
+          photos.map(url => ({ match_id: matchId, user_id: user.id, url }))
+        );
       }
       nav(isEdit ? "/profile" : "/");
     } catch (err: unknown) {
@@ -355,6 +377,11 @@ const LogMatch = () => {
             placeholder="Why? (optional)"
             className="bg-card border-border min-h-[64px]"
           />
+        </Field>
+
+        <Field label="Match Photos (optional)">
+          <p className="text-xs text-muted-foreground -mt-1">Add up to 3 photos from the day.</p>
+          <PhotoUploader photos={photos} onChange={setPhotos} />
         </Field>
 
         <Field label="Notes (optional)">

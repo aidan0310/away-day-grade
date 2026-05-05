@@ -51,7 +51,7 @@ const Feed = () => {
       setLoading(true);
       const { data: matches } = await supabase
         .from("matches")
-        .select("*, stadium:stadiums(id,name)")
+        .select("*, stadium:stadiums(id,name), photos:match_photos(url)")
         .order("created_at", { ascending: false })
         .limit(50);
 
@@ -91,6 +91,7 @@ const Feed = () => {
 
       setReviews(matches.map((m: any) => ({
         ...m,
+        photos: (m.photos ?? []).map((p: any) => p.url),
         profile: pmap.get(m.user_id)
           ? { ...pmap.get(m.user_id), match_count: countMap.get(m.user_id) ?? 0, avatar_url: pmap.get(m.user_id)?.avatar_url ?? null }
           : null,
