@@ -152,7 +152,22 @@ const [shareOpen, setShareOpen] = useState(false);
             <span className="truncate">{data.stadium.name}</span>
           </Link>
         </div>
-        <GradePill value={grade} size="md" />
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <GradePill value={grade} size="md" />
+          {photos.length > 0 && (
+            <div className="flex gap-1.5">
+              {photos.map((url, i) => (
+                <button
+                  key={url}
+                  onClick={() => { setPhotoIndex(i); setPhotoViewerOpen(true); }}
+                  className="h-16 w-16 rounded-xl overflow-hidden border border-border"
+                >
+                  <img src={url} alt="Match photo" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </header>
 
       {data.home_score != null && data.away_score != null && (() => {
@@ -204,19 +219,6 @@ const [shareOpen, setShareOpen] = useState(false);
         </p>
       )}
 
-      {photos.length > 0 && (
-        <div className="flex gap-2">
-          {photos.map((url, i) => (
-            <button
-              key={url}
-              onClick={() => { setPhotoIndex(i); setPhotoViewerOpen(true); }}
-              className="h-20 flex-1 rounded-xl overflow-hidden border border-border"
-            >
-              <img src={url} alt="Match photo" className="h-full w-full object-cover" />
-            </button>
-          ))}
-        </div>
-      )}
       {photoViewerOpen && (
         <PhotoViewer photos={photos} initialIndex={photoIndex} onClose={() => setPhotoViewerOpen(false)} />
       )}
