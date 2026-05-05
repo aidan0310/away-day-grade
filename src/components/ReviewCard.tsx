@@ -170,19 +170,23 @@ const [shareOpen, setShareOpen] = useState(false);
         </div>
       </header>
 
-      {photos.length > 0 && (
-        <div className="flex gap-2 -mt-1">
-          {photos.map((url, i) => (
+      <div className="flex flex-col items-end gap-2 shrink-0">
+          <GradePill value={grade} size="md" />
+          {photos.length > 0 && (
             <button
-              key={url}
-              onClick={() => { setPhotoIndex(i); setPhotoViewerOpen(true); }}
-              className="flex-1 h-40 rounded-xl overflow-hidden border border-border"
+              onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
+              className="relative h-24 w-24 rounded-xl overflow-hidden border border-border shrink-0"
             >
-              <img src={url} alt="Match photo" className="h-full w-full object-cover" />
+              <img src={photos[0]} alt="Match photo" className="h-full w-full object-cover" />
+              {photos.length > 1 && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                  <span className="text-white font-extrabold text-sm">+{photos.length - 1}</span>
+                </div>
+              )}
             </button>
-          ))}
+          )}
         </div>
-      )}
+      </header>
 
       {data.home_score != null && data.away_score != null && (() => {
         const userIsHome = !data.is_away;
