@@ -156,7 +156,7 @@ const [shareOpen, setShareOpen] = useState(false);
           {photos.length > 0 && (
             <button
               onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
-              className="relative h-32 w-24 rounded-xl overflow-hidden border border-border shrink-0"
+              className="relative h-36 w-30 rounded-xl overflow-hidden border border-border shrink-0"
             >
               <img src={photos[0]} alt="Match photo" className="h-full w-full object-cover" />
               {photos.length > 1 && (
