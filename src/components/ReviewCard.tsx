@@ -152,7 +152,22 @@ const [shareOpen, setShareOpen] = useState(false);
             <span className="truncate">{data.stadium.name}</span>
           </Link>
         </div>
-       <GradePill value={grade} size="md" />
+       <div className="flex flex-col items-end gap-2 shrink-0">
+          <GradePill value={grade} size="md" />
+          {photos.length > 0 && (
+            <button
+              onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
+              className="relative h-24 w-24 rounded-xl overflow-hidden border border-border shrink-0"
+            >
+              <img src={photos[0]} alt="Match photo" className="h-full w-full object-cover" />
+              {photos.length > 1 && (
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl">
+                  <span className="text-white font-extrabold text-sm">+{photos.length - 1}</span>
+                </div>
+              )}
+            </button>
+          )}
+        </div>
       </header>
 
       {photos.length > 0 && (
