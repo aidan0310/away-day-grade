@@ -87,7 +87,6 @@
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 20% 97%));
     --gradient-hero: linear-gradient(180deg, hsl(220 20% 95%), hsl(220 20% 92%));
   }
-  }
 
   * {
     @apply border-border;
