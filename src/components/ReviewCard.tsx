@@ -129,8 +129,8 @@ const [shareOpen, setShareOpen] = useState(false);
 
   return (
     <article className="stat-card space-y-4 transition-all hover:border-primary/40 hover:shadow-elevated">
-      <header className="flex items-start justify-between gap-3">
-        <div className="space-y-1.5 min-w-0 flex-1">
+      <header className="relative flex items-start justify-between gap-3" style={{ minHeight: photos.length > 0 ? "5rem" : undefined }}>
+        <div className="space-y-1.5 min-w-0" style={{ paddingRight: photos.length > 0 ? "7rem" : "3.5rem" }}>
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`rounded-md px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider ${data.is_away ? "bg-accent text-accent-foreground" : "bg-secondary text-foreground"}`}>
               {data.is_away ? "Away" : "Home"}
@@ -144,7 +144,7 @@ const [shareOpen, setShareOpen] = useState(false);
               {data.competition}
             </span>
           )}
-          <h3 className="text-xl font-extrabold leading-tight truncate">
+          <h3 className="text-xl font-extrabold leading-tight">
             vs {data.opponent}
           </h3>
           <Link to={`/stadium/${data.stadium.id}`} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors">
@@ -152,11 +152,11 @@ const [shareOpen, setShareOpen] = useState(false);
             <span className="truncate">{data.stadium.name}</span>
           </Link>
         </div>
-        <div className="flex items-start gap-2 shrink-0">
+        <div className="absolute top-0 right-0 flex items-start gap-2">
           {photos.length > 0 && (
             <button
               onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
-              className="relative h-36 w-24 rounded-xl overflow-hidden border border-border shrink-0"
+              className="relative h-32 w-24 rounded-xl overflow-hidden border border-border shrink-0"
             >
               <img src={photos[0]} alt="Match photo" className="h-full w-full object-cover" />
               {photos.length > 1 && (
