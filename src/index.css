@@ -72,20 +72,21 @@
 
 @layer base {
   .light {
-    --background: 0 0% 97%;
+    --background: 220 20% 95%;
     --foreground: 220 13% 8%;
     --card: 0 0% 100%;
     --card-foreground: 220 13% 8%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 13% 8%;
-    --secondary: 220 13% 92%;
+    --secondary: 220 15% 88%;
     --secondary-foreground: 220 13% 8%;
-    --muted: 220 13% 90%;
-    --muted-foreground: 220 9% 40%;
-    --border: 220 13% 82%;
-    --input: 220 13% 90%;
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 97%));
-    --gradient-hero: linear-gradient(180deg, hsl(0 0% 97%), hsl(0 0% 94%));
+    --muted: 220 13% 85%;
+    --muted-foreground: 220 9% 30%;
+    --border: 220 13% 75%;
+    --input: 220 13% 88%;
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 20% 97%));
+    --gradient-hero: linear-gradient(180deg, hsl(220 20% 95%), hsl(220 20% 92%));
+  }
   }
 
   * {
