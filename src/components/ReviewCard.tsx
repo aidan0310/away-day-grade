@@ -152,8 +152,7 @@ const [shareOpen, setShareOpen] = useState(false);
             <span className="truncate">{data.stadium.name}</span>
           </Link>
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          <GradePill value={grade} size="md" />
+        <div className="flex items-start gap-2 shrink-0">
           {photos.length > 0 && (
             <button
               onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
@@ -167,6 +166,7 @@ const [shareOpen, setShareOpen] = useState(false);
               )}
             </button>
           )}
+          <GradePill value={grade} size="md" />
         </div>
       </header>
 
