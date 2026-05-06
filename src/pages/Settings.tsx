@@ -87,7 +87,7 @@ const Settings = () => {
   };
 
   const reportBug = () => {
-    window.open(`mailto:acmartin0310@gmail.com?subject=Bug Report - The Away End&body=Describe the bug here...`, "_blank");
+    window.open("https://docs.google.com/forms/d/e/1FAIpQLSdCKoCpUYit0SemPnQ5n9NUSt9L1IUHb3W-mlUEdWQ3c04PXA/viewform", "_blank");
   };
 
   return (
