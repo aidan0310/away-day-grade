@@ -132,7 +132,7 @@ const [shareOpen, setShareOpen] = useState(false);
       <header className="relative flex items-start justify-between gap-3" style={{ minHeight: photos.length > 0 ? "5rem" : undefined }}>
         <div className="space-y-1.5 min-w-0" style={{ paddingRight: photos.length > 0 ? "7rem" : "3.5rem" }}>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className={`rounded-md px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider ${data.is_away ? "bg-accent text-accent-foreground" : "bg-secondary text-foreground"}`}>
+            <span className={`rounded-md px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider ${data.is_away ? "border border-border text-muted-foreground" : "bg-primary text-primary-foreground"}`}>
               {data.is_away ? "Away" : "Home"}
             </span>
             <span className="text-xs font-medium text-muted-foreground">
