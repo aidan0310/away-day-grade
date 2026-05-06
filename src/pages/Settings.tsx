@@ -87,7 +87,7 @@ const Settings = () => {
   };
 
   const reportBug = () => {
-    window.location.href = `mailto:acmartin0310@gmail.com?subject=Bug Report - The Away End&body=Describe the bug here...`;
+    window.open(`mailto:acmartin0310@gmail.com?subject=Bug Report - The Away End&body=Describe the bug here...`, "_blank");
   };
 
   return (
