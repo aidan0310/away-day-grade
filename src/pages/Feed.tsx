@@ -8,7 +8,7 @@ import { Loader2, Plus, Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type FeedTab = "all" | "following";
+type FeedTab = "all" | "following" | "my_club";
 
 const Feed = () => {
   const { profile, user } = useAuth();
@@ -104,6 +104,8 @@ const Feed = () => {
 
   const displayed = tab === "following"
     ? reviews.filter(r => followingIds.includes(r.user_id))
+    : tab === "my_club"
+    ? reviews.filter(r => r.profile?.supported_team === profile?.supported_team)
     : reviews;
 
   return (
@@ -145,7 +147,7 @@ const Feed = () => {
         </div>
 
         <div className="flex gap-2">
-          {(["all", "following"] as FeedTab[]).map((t) => (
+          {(["all", "following", "my_club"] as FeedTab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -156,7 +158,7 @@ const Feed = () => {
                   : "bg-card text-muted-foreground border border-border"
               )}
             >
-              {t === "all" ? "All" : "Following"}
+              {t === "all" ? "All" : t === "following" ? "Following" : profile?.supported_team ?? "My Club"}
             </button>
           ))}
         </div>
@@ -174,6 +176,10 @@ const Feed = () => {
             >
               Find fans to follow
             </button>
+          </div>
+        ) : displayed.length === 0 && tab === "my_club" ? (
+          <div className="text-center py-16 space-y-4">
+            <p className="text-muted-foreground">No reviews from {profile?.supported_team ?? "your club"} fans yet.</p>
           </div>
         ) : displayed.length === 0 ? (
           <div className="text-center py-16 space-y-4">
