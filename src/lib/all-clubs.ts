@@ -40,7 +40,7 @@ export const ALL_FOOTBALL_CLUBS: Club[] = [
   { name: "Leicester City", primaryHex: "#003090", secondaryHex: "#FDBE11", stadium: "King Power Stadium", league: "Championship" },
   { name: "Middlesbrough", primaryHex: "#E41B17", secondaryHex: "#FFFFFF", stadium: "Riverside Stadium", league: "Championship" },
   { name: "Millwall", primaryHex: "#001D5E", secondaryHex: "#FFFFFF", stadium: "The Den", league: "Championship" },
-  { name: "Norwich City", primaryHex: "#00A650", secondaryHex: "#FFF200", stadium: "Carrow Road", league: "Championship" },
+  { name: "Norwich City", primaryHex: "#FFF200", secondaryHex: "#00A650", stadium: "Carrow Road", league: "Championship" },
   { name: "Oxford United", primaryHex: "#F9A01B", secondaryHex: "#000000", stadium: "Kassam Stadium", league: "Championship" },
   { name: "Portsmouth", primaryHex: "#001489", secondaryHex: "#FFFFFF", stadium: "Fratton Park", league: "Championship" },
   { name: "Preston North End", primaryHex: "#001A57", secondaryHex: "#FFFFFF", stadium: "Deepdale", league: "Championship" },
