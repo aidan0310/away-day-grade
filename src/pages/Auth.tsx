@@ -81,7 +81,7 @@ const Auth = () => {
             <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-primary shadow-glow">
               <span className="font-display text-4xl text-primary-foreground">AE</span>
             </div>
-            <h1 className="font-display text-5xl tracking-wider">The Away End</h1>
+            <h1 className="font-display text-5xl tracking-wider">MatchDayXP</h1>
             <p className="text-muted-foreground text-lg max-w-xs mx-auto leading-relaxed">
               Rate every away day. Build your terrace legacy. Join the fans.
             </p>
@@ -159,7 +159,7 @@ const Auth = () => {
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary glow-primary">
             <span className="font-display text-3xl text-primary-foreground">AE</span>
           </div>
-          <h1 className="font-display text-5xl tracking-wider">The Away End</h1>
+          <h1 className="font-display text-5xl tracking-wider">MatchDayXP</h1>
           <p className="text-muted-foreground">Rate every match day. Build your terrace legacy.</p>
         </div>
 

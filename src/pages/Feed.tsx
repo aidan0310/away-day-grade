@@ -137,7 +137,7 @@ const Feed = () => {
         <div className="rounded-2xl p-5 shadow-glow" style={{ background: `hsl(var(--primary))` }}>
           <p className="text-xs font-extrabold uppercase tracking-widest opacity-80">Welcome back</p>
           <p className="text-2xl font-extrabold mt-1">{profile?.supported_team ? `Up the ${profile.supported_team}` : "Pick your team"}</p>
-          <p className="text-sm opacity-90 mt-1">Latest reviews from the away end.</p>
+          <p className="text-sm opacity-90 mt-1">Latest reviews from the terraces.</p>
           <button
             onClick={() => { setLastRefresh(Date.now()); }}
             className="mt-2 text-xs font-extrabold uppercase tracking-widest opacity-70 hover:opacity-100 transition-opacity"

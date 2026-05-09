@@ -191,7 +191,7 @@ export const ShareScorecard = ({ data, onClose }: Props) => {
               </p>
             </div>
             <p style={{ fontSize: 9, fontWeight: 700, color: "#4b5563", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-              theawayend.app
+              matchdayxp.app
             </p>
           </div>
         </div>
