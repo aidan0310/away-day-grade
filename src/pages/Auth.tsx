@@ -79,7 +79,7 @@ const Auth = () => {
         <div className="flex-1 flex flex-col items-center justify-center px-5 pt-16 pb-8 text-center space-y-6">
           <div className="space-y-3">
             <div className="inline-flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-primary shadow-glow">
-              <span className="font-display text-4xl text-primary-foreground">AE</span>
+              <span className="font-display text-4xl text-primary-foreground">MX</span>
             </div>
             <h1 className="font-display text-5xl tracking-wider">MatchDayXP</h1>
             <p className="text-muted-foreground text-lg max-w-xs mx-auto leading-relaxed">
@@ -157,7 +157,7 @@ const Auth = () => {
       <div className="w-full max-w-md space-y-8">
         <div className="text-center space-y-3">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-primary glow-primary">
-            <span className="font-display text-3xl text-primary-foreground">AE</span>
+            <span className="font-display text-3xl text-primary-foreground">MX</span>
           </div>
           <h1 className="font-display text-5xl tracking-wider">MatchDayXP</h1>
           <p className="text-muted-foreground">Rate every match day. Build your terrace legacy.</p>
