@@ -152,22 +152,7 @@ const [shareOpen, setShareOpen] = useState(false);
             <span className="truncate">{data.stadium.name}</span>
           </Link>
         </div>
-        <div className="absolute top-0 right-0 flex items-start gap-2">
-          {photos.length > 0 && (
-            <button
-              onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
-              className="relative h-32 w-24 rounded-xl overflow-hidden border border-border shrink-0"
-            >
-              <img src={photos[0]} alt="Match photo" className="h-full w-full object-cover" />
-              {photos.length > 1 && (
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <span className="text-white font-extrabold text-sm">+{photos.length - 1}</span>
-                </div>
-              )}
-            </button>
-          )}
-          <GradePill value={grade} size="md" />
-        </div>
+        <GradePill value={grade} size="md" />
       </header>
 
       {data.home_score != null && data.away_score != null && (() => {
@@ -221,6 +206,16 @@ const [shareOpen, setShareOpen] = useState(false);
 
       {photoViewerOpen && (
         <PhotoViewer photos={photos} initialIndex={photoIndex} onClose={() => setPhotoViewerOpen(false)} />
+      )}
+
+      {photos.length > 0 && (
+        <button
+          onClick={() => { setPhotoIndex(0); setPhotoViewerOpen(true); }}
+          className="flex items-center gap-2 text-xs font-extrabold text-muted-foreground hover:text-primary transition-colors"
+        >
+          <span>📷</span>
+          <span>{photos.length} {photos.length === 1 ? "photo" : "photos"} — tap to view</span>
+        </button>
       )}
 
       <footer className="pt-3 border-t border-border space-y-3">
