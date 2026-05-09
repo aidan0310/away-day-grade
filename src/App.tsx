@@ -20,6 +20,7 @@ import EditProfile from "./pages/EditProfile";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import Matches from "./pages/Matches";
+import MapView from "./pages/MapView";;
 import MatchDetail from "./pages/MatchDetail";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
@@ -71,6 +72,7 @@ const App = () => (
 <Route path="/notifications" element={<Protected><Notifications /></Protected>} />
 <Route path="/settings" element={<Protected><Settings /></Protected>} />
 <Route path="/matches" element={<Protected><Matches /></Protected>} />
+<Route path="/map" element={<Protected><MapView /></Protected>} />
 <Route path="/match/:key" element={<Protected><MatchDetail /></Protected>} />
 <Route path="*" element={<NotFound />} />
           </Routes>
