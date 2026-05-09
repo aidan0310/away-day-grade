@@ -110,7 +110,7 @@ const Feed = () => {
 
   return (
     <AppShell
-      title="Terrace"
+      title="MatchDayXP"
       right={
         <div className="flex items-center gap-2">
           <button
