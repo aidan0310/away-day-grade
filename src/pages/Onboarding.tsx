@@ -1,18 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { Loader2, ChevronDown, Trophy, Star, BarChart3, ArrowRight, Check } from "lucide-react";
+import { Loader2, ChevronDown, Trophy, Star, BarChart3, ArrowRight, Check, UserPlus } from "lucide-react";
 import { ALL_FOOTBALL_CLUBS } from "@/lib/all-clubs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { allClubForName } from "@/lib/all-clubs";
+import { getRank } from "@/lib/ranks";
+import { Avatar } from "@/components/Avatar";
 
-type Step = 1 | 2 | 3;
+type Step = 1 | 2 | 3 | 4;
+
+type SuggestedUser = {
+  id: string;
+  display_name: string;
+  supported_team: string | null;
+  avatar_url: string | null;
+  match_count: number;
+};
 
 const Onboarding = () => {
   const nav = useNavigate();
@@ -23,6 +33,9 @@ const Onboarding = () => {
   const [query, setQuery] = useState("");
   const [displayName, setDisplayName] = useState(profile?.display_name ?? "");
   const [loading, setLoading] = useState(false);
+  const [suggestedUsers, setSuggestedUsers] = useState<SuggestedUser[]>([]);
+  const [followedIds, setFollowedIds] = useState<Set<string>>(new Set());
+  const [followLoading, setFollowLoading] = useState<string | null>(null);
 
   const filtered = ALL_FOOTBALL_CLUBS.filter(c =>
     c.name.toLowerCase().includes(query.toLowerCase())
@@ -35,6 +48,35 @@ const Onboarding = () => {
   };
 
   const selectedClub = team ? allClubForName(team) : null;
+
+  // Load suggested users when reaching step 4
+  useEffect(() => {
+    if (step !== 4 || !user) return;
+    (async () => {
+      setLoading(true);
+      const { data: allMatches } = await supabase.from("matches").select("user_id");
+      if (!allMatches) { setLoading(false); return; }
+
+      const countMap = new Map<string, number>();
+      allMatches.forEach((m: any) => {
+        countMap.set(m.user_id, (countMap.get(m.user_id) ?? 0) + 1);
+      });
+
+      const userIds = [...countMap.keys()].filter(id => id !== user.id);
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, display_name, supported_team, avatar_url")
+        .in("id", userIds);
+
+      const ranked = (profiles ?? [])
+        .map((p: any) => ({ ...p, match_count: countMap.get(p.id) ?? 0 }))
+        .sort((a: any, b: any) => b.match_count - a.match_count)
+        .slice(0, 8);
+
+      setSuggestedUsers(ranked);
+      setLoading(false);
+    })();
+  }, [step, user]);
 
   const saveStep1 = async () => {
     if (!user || !team) return;
@@ -57,11 +99,26 @@ const Onboarding = () => {
     setStep(3);
   };
 
+  const toggleFollow = async (targetId: string) => {
+    if (!user) return;
+    setFollowLoading(targetId);
+    if (followedIds.has(targetId)) {
+      await supabase.from("follows").delete()
+        .eq("follower_id", user.id)
+        .eq("following_id", targetId);
+      setFollowedIds(prev => { const s = new Set(prev); s.delete(targetId); return s; });
+    } else {
+      await supabase.from("follows").insert({ follower_id: user.id, following_id: targetId });
+      setFollowedIds(prev => new Set(prev).add(targetId));
+    }
+    setFollowLoading(null);
+  };
+
   return (
     <div className="min-h-screen flex flex-col px-5 py-10">
       {/* Progress indicator */}
       <div className="flex gap-2 mb-10">
-        {[1, 2, 3].map((s) => (
+        {[1, 2, 3, 4].map((s) => (
           <div
             key={s}
             className={cn(
@@ -76,12 +133,11 @@ const Onboarding = () => {
       {step === 1 && (
         <div className="flex-1 flex flex-col space-y-8">
           <div className="space-y-2">
-            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">Step 1 of 3</p>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">Step 1 of 4</p>
             <h1 className="font-display text-4xl tracking-wider">Who do you support?</h1>
             <p className="text-muted-foreground">Search across all 92 Football League clubs.</p>
           </div>
 
-          {/* Club colour preview */}
           {selectedClub && (
             <div
               className="rounded-2xl p-4 flex items-center gap-4 transition-all"
@@ -162,7 +218,7 @@ const Onboarding = () => {
       {step === 2 && (
         <div className="flex-1 flex flex-col space-y-8">
           <div className="space-y-2">
-            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">Step 2 of 3</p>
+            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">Step 2 of 4</p>
             <h1 className="font-display text-4xl tracking-wider">What's your terrace name?</h1>
             <p className="text-muted-foreground">This is how other fans will see you.</p>
           </div>
@@ -196,7 +252,7 @@ const Onboarding = () => {
         </div>
       )}
 
-      {/* Step 3 — All set */}
+      {/* Step 3 — All set explainer */}
       {step === 3 && (
         <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
           <div className="space-y-3">
@@ -228,6 +284,69 @@ const Onboarding = () => {
           </div>
 
           <div className="w-full space-y-3 pt-4">
+            <Button
+              onClick={() => setStep(4)}
+              className="w-full h-14 bg-gradient-primary text-primary-foreground font-extrabold shadow-glow text-base"
+            >
+              Next <ArrowRight className="h-5 w-5 ml-2" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 4 — Find fans to follow */}
+      {step === 4 && (
+        <div className="flex-1 flex flex-col space-y-6">
+          <div className="space-y-2">
+            <p className="text-xs font-extrabold uppercase tracking-widest text-primary">Step 4 of 4</p>
+            <h1 className="font-display text-4xl tracking-wider">Find fans to follow.</h1>
+            <p className="text-muted-foreground">Follow the most active fans to fill your feed.</p>
+          </div>
+
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : suggestedUsers.length === 0 ? (
+            <p className="text-muted-foreground text-center py-10">No other fans yet — you're early!</p>
+          ) : (
+            <div className="rounded-2xl overflow-hidden border border-border bg-card">
+              {suggestedUsers.map((u) => {
+                const rank = getRank(u.match_count);
+                const isFollowing = followedIds.has(u.id);
+                return (
+                  <div
+                    key={u.id}
+                    className="flex items-center gap-3 px-4 py-3 border-t border-border/60 first:border-0"
+                  >
+                    <Avatar url={u.avatar_url} name={u.display_name} size="md" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-extrabold truncate">@{u.display_name}</p>
+                      <p className="text-xs text-muted-foreground">{u.supported_team ?? "No team"}</p>
+                      <p className={`text-[10px] font-extrabold uppercase tracking-wider ${rank.color}`}>{rank.label}</p>
+                    </div>
+                    <button
+                      onClick={() => toggleFollow(u.id)}
+                      disabled={followLoading === u.id}
+                      className={cn(
+                        "rounded-xl px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all shrink-0",
+                        isFollowing
+                          ? "bg-secondary text-foreground border border-border"
+                          : "bg-gradient-primary text-primary-foreground shadow-glow"
+                      )}
+                    >
+                      {followLoading === u.id
+                        ? <Loader2 className="h-3 w-3 animate-spin" />
+                        : isFollowing ? <><Check className="h-3 w-3 inline mr-1" />Following</> : <><UserPlus className="h-3 w-3 inline mr-1" />Follow</>
+                      }
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          <div className="mt-auto space-y-3 pt-4">
             <Button
               onClick={() => nav("/log")}
               className="w-full h-14 bg-gradient-primary text-primary-foreground font-extrabold shadow-glow text-base"
