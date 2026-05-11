@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { ReviewCard, ReviewCardData } from "@/components/ReviewCard";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, Plus, Search, Bell, MapPin } from "lucide-react";
+import { Loader2, Plus, Search, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -113,12 +113,6 @@ const Feed = () => {
       title="MatchDayXP"
       right={
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => nav("/map")}
-            className="h-9 w-9 flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-primary transition-colors"
-          >
-            <MapPin className="h-5 w-5" />
-          </button>
           <button
             onClick={() => nav("/notifications")}
             className="relative h-9 w-9 flex items-center justify-center rounded-xl bg-card border border-border text-muted-foreground hover:text-primary transition-colors"
