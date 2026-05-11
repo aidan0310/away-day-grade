@@ -38,8 +38,10 @@ export const ShareScorecard = ({ data, onClose }: Props) => {
   const rank = getRank(data.profile?.match_count ?? 0);
 
   const userIsHome = !data.is_away;
-  const userScore = userIsHome ? data.home_score : data.away_score;
-  const oppScore = userIsHome ? data.away_score : data.home_score;
+  const homeScore = data.home_score != null ? Number(data.home_score) : null;
+  const awayScore = data.away_score != null ? Number(data.away_score) : null;
+  const userScore = userIsHome ? homeScore : awayScore;
+  const oppScore = userIsHome ? awayScore : homeScore;
   const result =
     userScore != null && oppScore != null
       ? userScore > oppScore ? "W" : userScore < oppScore ? "L" : "D"
@@ -121,7 +123,7 @@ export const ShareScorecard = ({ data, onClose }: Props) => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
             <div>
               <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.12em", color: "#6b7280", marginBottom: 4 }}>
-                {data.is_away ? "Away Day" : "Home Day"} · The Away End
+                {data.is_away ? "Away Day" : "Home Day"} · MatchDayXP
               </p>
               <p style={{ fontSize: 20, fontWeight: 900, color: "#f9fafb", lineHeight: 1.1, marginBottom: 2 }}>
                 vs {data.opponent}
@@ -144,7 +146,7 @@ export const ShareScorecard = ({ data, onClose }: Props) => {
           </div>
 
           {/* Result badge */}
-          {result && data.home_score != null && data.away_score != null && (
+          {result && homeScore != null && awayScore != null && (
             <div style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               background: "#1f2937", borderRadius: 10, padding: "6px 12px",
@@ -152,7 +154,7 @@ export const ShareScorecard = ({ data, onClose }: Props) => {
             }}>
               <span style={{ fontSize: 13, fontWeight: 900, color: resultColor }}>{result}</span>
               <span style={{ fontSize: 15, fontWeight: 800, color: "#f9fafb", letterSpacing: "0.05em" }}>
-                {data.home_score} – {data.away_score}
+                {homeScore} – {awayScore}
               </span>
             </div>
           )}

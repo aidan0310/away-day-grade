@@ -27,9 +27,8 @@ const Settings = () => {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    const isDark = document.documentElement.classList.contains("dark") ||
-      !document.documentElement.classList.contains("light");
-    setDarkMode(isDark);
+    const savedTheme = localStorage.getItem("theme") ?? "dark";
+    setDarkMode(savedTheme === "dark");
   }, []);
 
   const toggleDarkMode = () => {
